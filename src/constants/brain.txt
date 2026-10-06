@@ -1,0 +1,5 @@
+// ScriptedBot.cs private constants.
+BOT_SCRIPTED_SPOT_BAN_TICKS 300 // ScriptedBot.SpotBanTicks: the reference's literal 300, ten seconds
+BOT_SCRIPTED_CARRIER_STUCK_TICKS 300 // ScriptedBot.CarrierStuckTicks
+BOT_SCRIPTED_CARRIER_PROGRESS_DISTANCE 24 // ScriptedBot.CarrierProgressDistance
+BOT_SCRIPTED_CARRIER_HOLD_CEILING 4000 // ScriptedBot.CarrierHoldCeiling

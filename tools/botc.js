@@ -273,6 +273,10 @@ function transpile(src, file, funcs, { isFunction = false, constants = new Map()
       err(t, `${t.text}${t.text === 'argument' ? '[...]' : ''} is not supported; use argument0..argument15`);
       continue;
     }
+    if (CONST_RE.test(t.text) && !constants.has(t.text) && constants.size > 0) {
+      err(t, `${t.text} looks like a constant but none is defined (src/constants/*.txt)`);
+      continue;
+    }
     if (!funcs.has(t.text)) continue;
     const open = nextSig(toks, k);
     if (open < 0 || toks[open].text !== '(') {

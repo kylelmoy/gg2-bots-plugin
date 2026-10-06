@@ -28,3 +28,4 @@ with (Player)
 
 botNavInit();
 botBrainInit();
+botStatsReset();
