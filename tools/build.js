@@ -3,6 +3,8 @@
 // build.js - transpile, lint, assemble and install the plugin.
 //
 //   node tools/build.js [--no-lint] [--no-install] [--game <build dir>] [--zip]
+//   node tools/build.js --stub-missing     lint only, with every called-but-undefined
+//                                          bot*/nav* function stubbed out
 //
 // 1. Every src/fn/**/<name>.gml is a function and every
 //    src/hooks/<Object>/<event>.gml an event appended to a game object.
@@ -77,7 +79,24 @@ function copyDir(from, to) {
 }
 
 // Collect and transpile. Returns { manifest, errors }.
-function compile() {
+// Every bot*/nav* name called somewhere in `files` but defined nowhere.
+function missingCalls(files, funcs) {
+  const { tokenize } = require('./botc.js');
+  const missing = new Map();
+  for (const f of files) {
+    const toks = tokenize(fs.readFileSync(f, 'utf8'), rel(f)).filter((t) => t.type !== 'ws' && t.type !== 'comment');
+    for (let i = 0; i + 1 < toks.length; i++) {
+      const t = toks[i];
+      if (t.type === 'ident' && NAME_RE.test(t.text) && toks[i + 1].text === '(' && !funcs.has(t.text)
+          && !(i > 0 && toks[i - 1].text === '.')) {
+        if (!missing.has(t.text)) missing.set(t.text, `${rel(f)}:${t.line}`);
+      }
+    }
+  }
+  return missing;
+}
+
+function compile({ stubMissing = false } = {}) {
   const errors = [];
   const fnFiles = walk(path.join(SRC, 'fn')).filter((f) => f.endsWith('.gml'));
   const hookFiles = walk(path.join(SRC, 'hooks')).filter((f) => f.endsWith('.gml'));
@@ -115,6 +134,17 @@ function compile() {
 
   const lines = [];
   const names = new Set(funcs.keys());
+  // --stub-missing: a function another part of the port has not written yet
+  // becomes an empty one, so the rest can be linted. Never installed.
+  let stubs = [];
+  if (stubMissing) {
+    const missing = missingCalls([...fnFiles, ...hookFiles], funcs);
+    stubs = [...missing.keys()].sort();
+    for (const name of stubs) {
+      names.add(name);
+      fs.writeFileSync(path.join(BUILD, 'code', 'fn', `${name}.gml`), `// STUB for lint: first called at ${missing.get(name)}\n`);
+    }
+  }
   for (const [name, f] of funcs) {
     const src = fs.readFileSync(f, 'utf8');
     const r = transpile(src, rel(f), names, { isFunction: true, constants });
@@ -134,7 +164,7 @@ function compile() {
   // Functions first: a hook may call any of them the moment it is attached.
   lines.sort((a, b) => (a.startsWith('fn') === b.startsWith('fn') ? 0 : a.startsWith('fn') ? -1 : 1));
   fs.writeFileSync(path.join(BUILD, 'code', 'manifest.txt'), lines.join('\r\n') + '\r\n');
-  return { errors, functions: funcs.size, hooks: hooks.length, constants: constants.size };
+  return { errors, functions: funcs.size, hooks: hooks.length, constants: constants.size, stubs };
 }
 
 function lint() {
@@ -186,16 +216,22 @@ function main() {
   const gi = args.indexOf('--game');
   const game = gi >= 0 ? args[gi + 1] : DEFAULT_GAME;
 
-  const c = compile();
+  const stubMissing = flag('--stub-missing');
+  const c = compile({ stubMissing });
   if (c.errors.length) {
     for (const e of c.errors) console.error(e);
     console.error(`build: ${c.errors.length} error(s), nothing built`);
     process.exit(1);
   }
   console.log(`build: ${c.functions} functions, ${c.hooks} hooks, ${c.constants} constants`);
+  if (c.stubs.length) console.log(`build: stubbed ${c.stubs.length} missing function(s): ${c.stubs.join(', ')}`);
   if (!flag('--no-lint') && !lint()) {
     console.error('build: lint failed, nothing installed');
     process.exit(1);
+  }
+  if (stubMissing) {
+    console.log('build: --stub-missing builds are for linting only; nothing assembled or installed');
+    return;
   }
   const out = assemble();
   if (flag('--zip')) {
