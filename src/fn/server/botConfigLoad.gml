@@ -11,7 +11,12 @@ global.botFillToPlayers = ini_read_real("Bots", "FillToPlayers", 8);
 global.botMaxBots = ini_read_real("Bots", "MaxBots", 8);
 global.botMinHumans = ini_read_real("Bots", "MinHumans", 1);
 global.botDifficulty = max(1, min(5, ini_read_real("Bots", "Difficulty", 5)));
-global.botNamePrefix = ini_read_string("Bots", "NamePrefix", "[BOT] ");
+// Windows' ini reader trims spaces off the value AND off the default, so the
+// default's space is put back here; a prefix ending in a space can be written
+// in quotes ("[BOT] "), which the reader strips.
+global.botNamePrefix = ini_read_string("Bots", "NamePrefix", "~");
+if (global.botNamePrefix == "~")
+    global.botNamePrefix = "[BOT] ";
 // "scripted" or "policy": whether the learned policy takes the wheel in a fight.
 global.botMode = string_lower(ini_read_string("Bots", "Mode", "policy"));
 // Whether a bot hands its wheel to the policy against other bots too, or only

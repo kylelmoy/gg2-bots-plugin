@@ -52,7 +52,7 @@ config section serves either server. Every key is optional.
 | `MaxBots` | 8 | never more bots than this |
 | `MinHumans` | 1 | no bots at all until this many people are connected |
 | `Difficulty` | 5 | 1 (easy) to 5 (hard) |
-| `NamePrefix` | `[BOT] ` | bots are named prefix + class |
+| `NamePrefix` | `[BOT] ` | bots are named prefix + class; quote it to keep a trailing space |
 | `Mode` | `policy` | `scripted` never hands the wheel to the policy |
 | `EngagesBots` | 0 | 1: the policy also takes over against other bots, not only against people (costs CPU for nobody's benefit) |
 | `Arbiter` | 10000 | microseconds of policy decisions allowed per tick; past it, bots stay scripted that tick |
