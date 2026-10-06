@@ -43,7 +43,7 @@ with (Player) if (botIsBot)
 {
     s += string(id) + ":" + string(class) + ":" + string(team) + ":";
     if (object != -1) s += string(round(object.x)) + ":" + string(round(object.y)); else s += "-:-";
-    s += ":" + string(stats[DEATHS]) + ":" + string(botHybridMicroTicks) + ";";
+    s += ":" + string(stats[DEATHS]) + ":" + string(botHybridMicroTicks) + ":" + string(botPathStuckFires) + ":" + string(botPathBlacklistFires) + ";";
 }
 global.botLiveSample = s + "|" + string(global.redCaps) + "|" + string(global.blueCaps)
     + "|" + string(global.botCostSum / max(1, global.botCostTicks)) + "|" + string(global.botCostMax)
@@ -64,8 +64,8 @@ async function sample() {
   }
   const [bots, red, blue, cost, max, ready, map] = raw.split('|');
   const list = bots.split(';').filter(Boolean).map((b) => {
-    const [id, cls, team, x, y, deaths, micro] = b.split(':');
-    return { id, cls: +cls, team: +team, x: x === '-' ? null : +x, y: y === '-' ? null : +y, deaths: +deaths, micro: +micro };
+    const [id, cls, team, x, y, deaths, micro, stuck, black] = b.split(':');
+    return { id, cls: +cls, team: +team, x: x === '-' ? null : +x, y: y === '-' ? null : +y, deaths: +deaths, micro: +micro, stuck: +stuck, black: +black };
   });
   return { list, red: +red, blue: +blue, cost: +cost, max: +max, ready: ready === '1', map };
 }
@@ -100,11 +100,13 @@ async function main() {
     const still = s.list.filter((b) => (moved.get(b.id) || 0) < 50);
     const micro = s.list.reduce((a, b) => a + b.micro, 0);
     const deaths = s.list.reduce((a, b) => a + b.deaths, 0);
+    const stuck = s.list.reduce((a, b) => a + b.stuck, 0);
+    const black = s.list.reduce((a, b) => a + b.black, 0);
     const ok = errs.length === 0 && still.length === 0 && s.ready;
     if (!ok) failed = true;
     console.log(`${ok ? 'ok  ' : 'FAIL'} ${s.map.padEnd(16)} bots ${s.list.length} nav ${s.ready ? 'yes' : 'NO '} ` +
       `caps R${s.red} B${s.blue} deaths ${deaths} policyTicks ${micro} cost ${s.cost.toFixed(2)}ms max ${s.max}ms ` +
-      `still ${still.length} errors ${errs.length}`);
+      `still ${still.length} stuck ${stuck} blacklisted ${black} errors ${errs.length}`);
     if (errs.length) console.log('     ' + [...new Set(errs.map((l) => l.replace(/^\S+\s+E\|\s*/, '')))].slice(0, 8).join('\n     '));
   }
   if (mcp.disconnectAll) mcp.disconnectAll();

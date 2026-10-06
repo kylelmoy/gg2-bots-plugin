@@ -29,3 +29,4 @@ with (Player)
 botNavInit();
 botBrainInit();
 botStatsReset();
+global.botRunning = true;

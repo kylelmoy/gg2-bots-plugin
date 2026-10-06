@@ -2,6 +2,7 @@
 // Players are destroyed with their own sockets by the game; what is ours is
 // the client end of every loopback connection and the shared structures.
 var i;
+global.botRunning = false;
 if (!variable_global_exists("botJoining"))
     exit;
 for (i = 0; i < ds_list_size(global.botJoining); i += 1)

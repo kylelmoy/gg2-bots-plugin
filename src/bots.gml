@@ -77,11 +77,13 @@ global.botLoad = '
 ';
 
 // The bot layer starts on the first End Step of each GameServer instance.
-// Not its Create event: an action appended to GameServer Create is skipped
-// when a listen server is started from the Host menu (measured: a load-time
-// hook on GameServer Create never ran there, while the same hook on its End
-// Step, and a Create hook on another object, did). botStarted lives on the
-// instance, so a new server - after leaving and hosting again - starts afresh.
+// Not its Create event: GameServerCreate ends in serverGotoMap -> room_goto,
+// and GM8 skips every remaining action of an event once room_goto has been
+// called - so an appended action runs only when the room change happens to be
+// queued behind another (a dedicated server's startup), and never when a
+// listen server is started from the Host menu. Measured both ways.
+// botStarted lives on the instance, so a new server - after leaving and
+// hosting again - starts afresh.
 object_event_add(GameServer, ev_step, ev_step_end, '
     if (!variable_local_exists("botStarted"))
     {
@@ -93,7 +95,13 @@ object_event_add(GameServer, ev_step, ev_step_end, '
     }
 ');
 
-object_event_add(GameServer, ev_destroy, 0, '
-    if (global.botLoaded)
-        event_perform_object(global.botF_botServerStop, ev_other, ev_user0);
+// Stopping is noticed from AudioControl (persistent, one per game, created in
+// game_init) rather than from GameServer's Destroy event, for the same reason
+// as above: Destroy ends in room_goto_fix, and GM8 runs none of an event's
+// remaining actions after a room_goto - so an appended action never would.
+global.botRunning = false;
+object_event_add(AudioControl, ev_step, ev_step_end, '
+    if (global.botRunning)
+        if (!instance_exists(GameServer))
+            event_perform_object(global.botF_botServerStop, ev_other, ev_user0);
 ');
