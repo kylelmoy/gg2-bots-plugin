@@ -1,0 +1,26 @@
+// The combat module's own constants (C# private consts and enums that have
+// no BotConstants value). See docs/combat.md.
+
+// BotTargetKind (BotTargeting.cs): what botCombatTargetKind holds.
+BOT_TARGET_KIND_NONE 0
+BOT_TARGET_KIND_CHARACTER 1
+BOT_TARGET_KIND_SENTRY 2
+BOT_TARGET_KIND_GENERATOR 3
+
+// BotAim.NoFloor: "no map is this tall" - disables the fall clamp.
+BOT_AIM_NO_FLOOR 100000
+
+// BotSuppress.NoSpot and BotSuppress.Frontier.
+BOT_SUPPRESS_NO_SPOT -1
+BOT_SUPPRESS_FRONTIER 512
+
+// BotAlly.FullHealth (a partition) and BotAlly.HumanPatient (a bonus).
+BOT_ALLY_FULL_HEALTH 4000
+BOT_ALLY_HUMAN_PATIENT 300
+
+// BotClassKeys.AirblastAmmo: Flamethrower/User Event 2's own ammoCount >= 40.
+BOT_CLASS_KEYS_AIRBLAST_AMMO 40
+
+// NavGraph.FeetOffset (private there): a standing character's origin is this
+// far above the floor. Used to turn a node row into a stand y without a call.
+BOT_COMBAT_STAND_FEET 23
