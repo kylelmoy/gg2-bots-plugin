@@ -1,0 +1,1 @@
+// botAttach(player): placeholder
