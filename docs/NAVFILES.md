@@ -75,3 +75,57 @@ first and `.txt` last, so the plugin - which treats a map as ready when
 gg2-navgen --map <name-or-png-path> [--area <n>] --key <key> --out <dir>
 gg2-navgen --all --out <dir>          every map gg2-server ships, every area
 ```
+
+- `--area` defaults to 1. A name is one of gg2-server's `maps/` (embedded in
+  the exe, so nothing else ships with it); anything ending in `.png` is a map
+  file read for its zTXt level data. `--key` must be `[A-Za-z0-9_-]+`.
+- `--all` writes `<name>_a<area>` for the 22 maps a stock game ships
+  (`gg_debug` included), every area: 24 pairs, as `cp_dirtbowl` has three. `gg_debug2` (authored in gg2-server, not in the
+  game) is skipped, though `--map gg_debug2` works.
+- Tables are written in ascending key order. The header's `present` is
+  exactly what `NavDistanceSet.PresentArcs` reports, and for a graph built
+  without `--sticky` (always, here) bit 4 is never set.
+- Quiet: nothing on stdout (`--verbose` prints per-graph size and time).
+  Exit 0 on success; 1 on a failure (bad PNG, I/O), 2 on a usage error (an
+  unknown map name, `--area` out of range, a bad key); the reason is on
+  stderr either way. On failure the temporary file is deleted and neither
+  final name is touched, so a previous `<key>.txt` stays as it was.
+- Temporaries are `<key>.dist.<pid>.tmp` and `<key>.txt.<pid>.tmp` in
+  `--out`; a crash can leave one, and nothing reads them.
+
+### What it costs
+
+Measured 2026-10-06, the published exe on the dev machine, warm disk:
+
+| | |
+|---|---|
+| `--map gg_debug` | ~40-80 ms end to end |
+| `--map ctf_truefort` (687 nodes) | ~230 ms; 2.0 MB `.txt`, 10.8 MB `.dist` |
+| `--map cp_dirtbowl --area 2` (835 nodes) | ~190 ms; 2.5 MB `.txt`, 16.8 MB `.dist` |
+| `--all` | ~0.5-0.8 s; 48 files, 183.6 MB (about 31 MB deflated, almost all `.dist`) |
+
+The `.dist` files are the bulk: `6 * N * N` bytes per table, 2-4 tables a
+map. They deflate about 6:1 in the zip; a smaller distribution could ship
+only the `.txt` files and run `--all` on first start instead (half a second).
+
+## Building the generator
+
+The C# is in a gg2-server worktree, `D:/Code/gg2-server-botsplugin`, branch
+`bots-plugin-navgen` (not merged into gg2-server's main): project
+`src/GG2.NavGen` (`gg2-navgen.exe`, referencing `GG2.Nav` and `GG2.Bots`),
+test `tests/GG2.Tests/PluginNavGenTests.cs`.
+
+```
+git -C D:/Code/gg2-server worktree add D:/Code/gg2-server-botsplugin bots-plugin-navgen   # once
+
+# self-contained, single file, trimmed, ReadyToRun, win-x64 (~16 MB)
+dotnet publish D:/Code/gg2-server-botsplugin/src/GG2.NavGen -c Release -r win-x64 -o D:/Code/gg2-server-botsplugin/src/GG2.NavGen/bin/publish
+
+# copy it to build/data/navgen/ and generate build/data/nav/ (--publish does the step above first)
+node tools/navdata.js [--publish] [--server <worktree>] [--exe <path>]
+
+node tools/build.js          # ships build/data/{navgen,nav,policy}
+```
+
+Neither the exe nor the generated files are committed; `build/` is
+gitignored.
