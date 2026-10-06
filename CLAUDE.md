@@ -44,6 +44,21 @@ beside this repo); the plugin is whatever was last installed. `gg2_evalx`,
 machine. A plugin change needs a session restart - the plugin compiles when the
 server starts.
 
+## GM8 traps this repo has already paid for
+
+- **`room_goto` ends the current event**: no later action in that event runs.
+  GameServer's Create and Destroy both call it, so the bootstrap starts the
+  layer from GameServer's End Step and notices the stop from AudioControl.
+  Never append to an event that changes room.
+- **Plugin functions are not scripts**: from `gg2_eval` call one as
+  `event_perform_object(global.botF_<name>, ev_other, ev_user0)`, with its
+  arguments in `global.botA0..`.
+- **A dead bot is passed as `char == -1`** everywhere (PORTING.md); `noone`
+  is not the same thing and reads as an unknown variable.
+
+`node tools/livecheck.js` (with a `gg2_session` running) is the regression
+check: every map of every mode, errors, movement, cost.
+
 ## Environment traps
 
 - Shell heredocs in this environment collapse `\\` and turn `\r`/`\n` escapes
