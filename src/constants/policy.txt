@@ -1,0 +1,66 @@
+// The policy module's constants: PolicyNetwork, ObservationWriter,
+// ActionDecoder, PolicyController, HybridBot, Handover, HandoverBubble and the
+// DecisionQuotaArbiter stand-in. C# private consts under their GML names.
+
+// --- the checkpoint contract (PolicyNetwork.Load's refusals) ---------------
+BOT_POLICY_FORMAT 1              // build/data/policy/*.txt format; docs/POLICY.md
+BOT_POLICY_ACTION_ENCODING 2     // SimulationStamp.ActionEncodingVersion
+BOT_POLICY_OBS_LAYOUT 2          // ObservationWriter.LayoutVersion
+BOT_POLICY_HEADS 6               // ActionDecoder.HeadShape.Length: 3,2,2,3,15,2
+BOT_POLICY_OUTPUTS 27            // sum of the head shape
+BOT_POLICY_MAX_LAYERS 8          // a sanity bound on a file's layer count
+BOT_POLICY_MAX_NETS 8            // a sanity bound on checkpoints loaded
+
+// --- the decision budget (DecisionQuotaArbiter) ------------------------------
+// Microseconds of controller work per tick when [Bots] Arbiter is not set.
+// gg2-server defaults 10000 with a policy decision priced at 7 us; a GML
+// decision costs about a millisecond, so the same 10 ms would buy ten of them
+// a tick. 4000 is about 12% of a 33 ms tick.
+BOT_ARBITER_DEFAULT_US 4000
+// What one observation is assumed to cost before any decision has been
+// timed. The forward pass is timed at load; the observation cannot be (no
+// character exists then).
+BOT_POLICY_OBS_COST_US 500
+BOT_POLICY_COST_MIN_US 50        // floor on the running cost estimate
+BOT_POLICY_COST_EMA 0.01         // weight of one timed decision in the estimate
+BOT_POLICY_TIMING_MS 40          // how long botPolicyNetLoad times each net for
+
+// --- ObservationWriter -------------------------------------------------------
+BOT_OBS_LENGTH 211
+BOT_OBS_CLASSES 9                // ClassCount: the Quote has no column
+BOT_OBS_PROJ_KINDS 9             // ProjectileKindCount
+BOT_OBS_ENEMIES 2
+BOT_OBS_PROJECTILES 4
+BOT_OBS_RAYS 24
+BOT_OBS_PATCH_SIDE 8
+BOT_OBS_GOAL_KINDS 4
+BOT_OBS_POSITION_SCALE 400
+BOT_OBS_VELOCITY_SCALE 15
+BOT_OBS_RAY_RANGE 320
+BOT_OBS_RAY_STEP 4
+BOT_OBS_RAY_PROBES 80            // RayRange / RayStep
+BOT_OBS_PATCH_CELL 16
+BOT_OBS_PROJECTILE_RADIUS 400
+BOT_OBS_MAX_NUTS 100             // CharacterState.MaxNutsNBolts
+// Where each block starts in the 211-float vector.
+BOT_OBS_AT_SELF 0                // 9 class + hp + 2 velocity + grounded + 2 aim + ammo + reload + ready + refire + special = 20
+BOT_OBS_AT_ENEMY 20              // 2 x 18
+BOT_OBS_ENEMY_BLOCK 18           // present, 2 position, 2 velocity, 9 class, hp, 2 aim, time since seen
+BOT_OBS_AT_PROJ 56               // 4 x 15
+BOT_OBS_PROJ_BLOCK 15            // present, 2 position, 2 velocity, 9 kind, hostile
+BOT_OBS_AT_RAY 116               // 24
+BOT_OBS_AT_PATCH 140             // 64
+BOT_OBS_AT_GOAL 204              // dy, dx, distance, 4 kind = 7
+
+// --- ActionDecoder -----------------------------------------------------------
+BOT_ACTION_AIM_BINS 15
+BOT_ACTION_AIM_CENTRE 7
+BOT_ACTION_MAX_TURN 30           // MaxTurnDegreesPerDecision
+BOT_ACTION_AIM_DISTANCE 100      // AimDistancePixels
+
+// --- HybridBot, Handover, HandoverBubble -------------------------------------
+BOT_HYBRID_RANGE 150             // HybridBot.EngagementRange
+BOT_HYBRID_BUBBLE_SPACING 9      // HybridBot.BubbleSpacingPolls
+BOT_BUBBLE_TOOK_POLICY 20        // HandoverBubble.TookPolicy (z1)
+BOT_BUBBLE_LEFT_CONTROLLER 21    // HandoverBubble.LeftAController (z2)
+BOT_BUBBLE_TOOK_SEARCH 22        // HandoverBubble.TookSearch (z3)
