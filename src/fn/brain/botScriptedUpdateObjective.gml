@@ -69,7 +69,7 @@ found = botObjectiveDecide(p, p.botScriptedRole, p.botScriptedSpreadX, allowSpot
 if (!found)
     exit;
 isSpot = global.botRetIsSpot;
-resolved = botObjectiveTryResolveLast(p);
+resolved = botObjectiveTryResolve(p, found, global.botRetX, global.botRetY, isSpot, global.botRetMustTouch, global.botRetOffset);
 if (!resolved)
     exit;
 gx = global.botRetX;
