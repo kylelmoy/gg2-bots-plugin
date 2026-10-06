@@ -2,7 +2,7 @@
 //
 // The game runs every Plugins/*.gml at startup (loadplugins.gml), on clients
 // and hosts alike, so this file does as little as possible: it remembers where
-// its files are and hooks GameServer's Create event. Only when this game starts
+// its files are and hooks GameServer's End Step. Only when this game starts
 // hosting does it compile the bot layer - every function and hook listed in
 // bots/code/manifest.txt - and start it. A client that never hosts pays for
 // one object_event_add.
@@ -76,14 +76,21 @@ global.botLoad = '
     return true;
 ';
 
-// Appended to GameServer Create, after GameServerCreate has run. That script
-// destroys the instance and exits when it cannot listen, and the rest of the
-// event still runs, so botServerStart checks for that itself.
-object_event_add(GameServer, ev_create, 0, '
-    if (!global.botLoaded)
-        execute_string(global.botLoad);
-    if (global.botLoaded)
-        event_perform_object(global.botF_botServerStart, ev_other, ev_user0);
+// The bot layer starts on the first End Step of each GameServer instance.
+// Not its Create event: an action appended to GameServer Create is skipped
+// when a listen server is started from the Host menu (measured: a load-time
+// hook on GameServer Create never ran there, while the same hook on its End
+// Step, and a Create hook on another object, did). botStarted lives on the
+// instance, so a new server - after leaving and hosting again - starts afresh.
+object_event_add(GameServer, ev_step, ev_step_end, '
+    if (!variable_local_exists("botStarted"))
+    {
+        botStarted = true;
+        if (!global.botLoaded)
+            execute_string(global.botLoad);
+        if (global.botLoaded)
+            event_perform_object(global.botF_botServerStart, ev_other, ev_user0);
+    }
 ');
 
 object_event_add(GameServer, ev_destroy, 0, '

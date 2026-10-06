@@ -1,5 +1,5 @@
-// botServerStart(): a GameServer has just been created. Called by bots.gml,
-// as the GameServer instance, after GameServerCreate has run.
+// botServerStart(): a GameServer has just started. Called by bots.gml,
+// as the GameServer instance, on its first End Step.
 //
 // GameServerCreate destroys itself and exits when it cannot listen or cannot
 // connect to itself; the rest of the Create event still runs, so check.

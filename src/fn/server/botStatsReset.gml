@@ -3,3 +3,4 @@
 global.botCostSum = 0;
 global.botCostTicks = 0;
 global.botCostMax = 0;
+global.botCostOver = 0;

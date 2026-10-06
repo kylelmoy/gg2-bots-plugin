@@ -40,5 +40,7 @@ with (Player)
 spent = current_time - t0;
 global.botCostSum += spent;
 global.botCostTicks += 1;
+if (spent > 20)
+    global.botCostOver += 1;
 if (spent > global.botCostMax)
     global.botCostMax = spent;
