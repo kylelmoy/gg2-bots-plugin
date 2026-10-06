@@ -1,0 +1,27 @@
+// The objective module's own constants (BotObjective, BotGoalSpot, BotRoles,
+// SpawnPoints). BOT_ROLE_*, BOT_SPOT_*, BOT_LOS_* and every other shared value
+// are BotConstants and live in generated.txt.
+
+// NavGraph.FeetOffset: a standing character's origin is this far above the
+// floor. Not BotConstants.FeetOffset (20), which is a different quantity.
+// Named here rather than NAV_* so it cannot collide with nav's own copy.
+BOT_OBJ_FEET_OFFSET 23
+
+// SpawnPoints.GroupCount: spawn groups per team, as offloadSpawnPoints.gml
+// allocates them.
+BOT_SPAWNS_GROUP_COUNT 5
+
+// botGoalSpotFind's NavQuery, packed into one number (a GML function takes at
+// most 16 arguments, and Find needs 14 besides the query). Also the reach
+// cache's key. -1 is "no query" (C# `reachableFor: null`).
+BOT_SPOT_Q_BLUE 1
+BOT_SPOT_Q_INTEL 2
+BOT_SPOT_Q_SETUP 4
+BOT_SPOT_Q_DJ 8
+BOT_SPOT_Q_RJ 16
+BOT_SPOT_Q_SJ 32
+
+// Added per node index to a candidate's rank, so ds_priority (whose tie order
+// is unspecified) breaks ties by node index as BotGoalSpot's sort does. A
+// thousand nodes move a rank by at most 0.001 px.
+BOT_SPOT_TIE_EPS 0.000001
