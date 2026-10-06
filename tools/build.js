@@ -23,7 +23,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { transpile, NAME_RE } = require('./botc.js');
+const { transpile, loadConstants, NAME_RE } = require('./botc.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'src');
@@ -101,6 +101,14 @@ function compile() {
     hooks.push({ object, event, file: f });
   }
 
+  const constants = new Map();
+  for (const f of walk(path.join(SRC, 'constants')).filter((x) => x.endsWith('.txt'))) {
+    errors.push(...loadConstants(fs.readFileSync(f, 'utf8'), rel(f), constants));
+  }
+  for (const name of constants.keys()) {
+    if (funcs.has(name)) errors.push(`constant ${name} has the name of a function`);
+  }
+
   rmrf(path.join(BUILD, 'code'));
   fs.mkdirSync(path.join(BUILD, 'code', 'fn'), { recursive: true });
   fs.mkdirSync(path.join(BUILD, 'code', 'hooks'), { recursive: true });
@@ -109,14 +117,14 @@ function compile() {
   const names = new Set(funcs.keys());
   for (const [name, f] of funcs) {
     const src = fs.readFileSync(f, 'utf8');
-    const r = transpile(src, rel(f), names, { isFunction: true });
+    const r = transpile(src, rel(f), names, { isFunction: true, constants });
     if (r.errors) { errors.push(...r.errors); continue; }
     fs.writeFileSync(path.join(BUILD, 'code', 'fn', `${name}.gml`), r.code);
     lines.push(`fn ${name} code/fn/${name}.gml`);
   }
   for (const h of hooks) {
     const src = fs.readFileSync(h.file, 'utf8');
-    const r = transpile(src, rel(h.file), names, { isFunction: false });
+    const r = transpile(src, rel(h.file), names, { isFunction: false, constants });
     if (r.errors) { errors.push(...r.errors); continue; }
     const out = `${h.object}__${h.event}.gml`;
     fs.writeFileSync(path.join(BUILD, 'code', 'hooks', out), r.code);
@@ -126,7 +134,7 @@ function compile() {
   // Functions first: a hook may call any of them the moment it is attached.
   lines.sort((a, b) => (a.startsWith('fn') === b.startsWith('fn') ? 0 : a.startsWith('fn') ? -1 : 1));
   fs.writeFileSync(path.join(BUILD, 'code', 'manifest.txt'), lines.join('\r\n') + '\r\n');
-  return { errors, functions: funcs.size, hooks: hooks.length };
+  return { errors, functions: funcs.size, hooks: hooks.length, constants: constants.size };
 }
 
 function lint() {
@@ -184,7 +192,7 @@ function main() {
     console.error(`build: ${c.errors.length} error(s), nothing built`);
     process.exit(1);
   }
-  console.log(`build: ${c.functions} functions, ${c.hooks} hooks transpiled`);
+  console.log(`build: ${c.functions} functions, ${c.hooks} hooks, ${c.constants} constants`);
   if (!flag('--no-lint') && !lint()) {
     console.error('build: lint failed, nothing installed');
     process.exit(1);

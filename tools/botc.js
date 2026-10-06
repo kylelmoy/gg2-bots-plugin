@@ -29,6 +29,10 @@
 // - `argumentN` inside a function is read once into a local at entry, so a
 //   function may call others freely; `argument[N]` and `argument_count` are
 //   refused.
+// - Constants are src/constants/*.txt, one `NAME value` per line (`//`
+//   comments allowed). Every use of NAME outside a string or comment is
+//   replaced by the literal, so a constant costs nothing at run time. A name
+//   must be SCREAMING_SNAKE and start with BOT_, NAV_ or POL_.
 // - A function that hands back more than one value sets global.botRetX etc.
 //   itself; the caller reads them immediately after the call.
 //
@@ -198,6 +202,34 @@ function text(toks, from, to) {
   return s;
 }
 
+// Token text with constants replaced by their values.
+function subst(toks, from, to, constants) {
+  let s = '';
+  for (let k = from; k <= to; k++) {
+    const t = toks[k];
+    s += t.type === 'ident' && constants.has(t.text) && !(k > 0 && toks[prevSig(toks, k)]?.text === '.') ? constants.get(t.text) : t.text;
+  }
+  return s;
+}
+
+// Parse a constants file into `into` (a Map), returning errors.
+const CONST_RE = /^(BOT|NAV|POL)_[A-Z0-9_]+$/;
+function loadConstants(src, file, into) {
+  const errors = [];
+  src.split(/\r?\n/).forEach((raw, i) => {
+    const line = raw.replace(/\/\/.*$/, '').trim();
+    if (!line) return;
+    const m = /^([A-Za-z_][A-Za-z0-9_]*)\s+(-?(?:\$[0-9A-Fa-f]+|[0-9]+(?:\.[0-9]+)?(?:[eE]-?[0-9]+)?))$/.exec(line);
+    if (!m) { errors.push(`${file}:${i + 1}: expected 'NAME value'`); return; }
+    if (!CONST_RE.test(m[1])) { errors.push(`${file}:${i + 1}: constant ${m[1]} must be SCREAMING_SNAKE starting with BOT_, NAV_ or POL_`); return; }
+    if (into.has(m[1])) { errors.push(`${file}:${i + 1}: constant ${m[1]} defined twice`); return; }
+    let v = m[2];
+    if (!v.includes('$') && /e/i.test(v)) v = String(Number(v));
+    into.set(m[1], v.startsWith('-') ? `(${v})` : v);
+  });
+  return errors;
+}
+
 function newlines(s) {
   let c = 0;
   for (let k = 0; k < s.length; k++) if (s.charCodeAt(k) === 10) c++;
@@ -227,7 +259,7 @@ function splitArgs(toks, open, close) {
 
 // ---------------------------------------------------------------------------
 
-function transpile(src, file, funcs, { isFunction = false } = {}) {
+function transpile(src, file, funcs, { isFunction = false, constants = new Map() } = {}) {
   const toks = tokenize(src, file);
   const edits = []; // { from, to, replacement } over token indices, inclusive
   const errors = [];
@@ -283,7 +315,7 @@ function transpile(src, file, funcs, { isFunction = false } = {}) {
         continue;
       }
       stmtStart = lvStart;
-      tail = ` ${text(toks, lvStart, lvEnd).replace(/\s+/g, ' ')} = global.botRet;`;
+      tail = ` ${subst(toks, lvStart, lvEnd, constants).replace(/\s+/g, ' ')} = global.botRet;`;
     } else if (p >= 0 && toks[p].type === 'ident' && toks[p].text === 'return') {
       if (!isFunction) {
         err(t, `return outside a function`);
@@ -306,7 +338,7 @@ function transpile(src, file, funcs, { isFunction = false } = {}) {
 
     let body = '{';
     args.forEach(([a, b], idx) => {
-      body += ` global.botA${idx} = (${text(toks, a, b).replace(/\s+/g, ' ').trim()});`;
+      body += ` global.botA${idx} = (${subst(toks, a, b, constants).replace(/\s+/g, ' ').trim()});`;
     });
     body += ` event_perform_object(global.botF_${t.text}, ev_other, ev_user0);${tail} }`;
     const original = text(toks, stmtStart, semi);
@@ -351,7 +383,7 @@ function transpile(src, file, funcs, { isFunction = false } = {}) {
         continue;
       }
       const original = text(toks, k, end);
-      const expr = text(toks, after, end - 1).replace(/\s+/g, ' ').trim();
+      const expr = subst(toks, after, end - 1, constants).replace(/\s+/g, ' ').trim();
       edits.push({ from: k, to: end, replacement: `{ global.botRet = (${expr}); exit; }` + '\n'.repeat(newlines(original)) });
     }
   } else {
@@ -366,11 +398,11 @@ function transpile(src, file, funcs, { isFunction = false } = {}) {
   let out = '';
   let k = 0;
   for (const e of edits) {
-    for (; k < e.from; k++) out += renameArg(toks[k], isFunction);
+    for (; k < e.from; k++) out += renameArg(toks[k], isFunction, constants);
     out += e.replacement;
     k = e.to + 1;
   }
-  for (; k < toks.length; k++) out += renameArg(toks[k], isFunction);
+  for (; k < toks.length; k++) out += renameArg(toks[k], isFunction, constants);
 
   if (isFunction && usedArgs.size) {
     const idx = [...usedArgs].sort((a, b) => a - b);
@@ -384,11 +416,12 @@ function transpile(src, file, funcs, { isFunction = false } = {}) {
   return { code: out };
 }
 
-function renameArg(tok, isFunction) {
+function renameArg(tok, isFunction, constants) {
+  if (tok.type === 'ident' && constants.has(tok.text)) return constants.get(tok.text);
   if (isFunction && tok.type === 'ident' && /^argument[0-9]+$/.test(tok.text)) {
     return 'botArg' + tok.text.slice('argument'.length);
   }
   return tok.text;
 }
 
-module.exports = { transpile, tokenize, NAME_RE };
+module.exports = { transpile, tokenize, loadConstants, NAME_RE };
