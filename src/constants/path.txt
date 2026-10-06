@@ -1,0 +1,18 @@
+// path module constants: PathFollower, JumpModel, RocketModel, StickyModel,
+// BotArc private/public consts that are not in BotConstants/NavConstants.
+
+// PathFollower.RocketAimDegrees: where a rocket jump aims - straight down.
+BOT_FOLLOWER_ROCKET_AIM_DEGREES 270
+// PathFollower.LipAimDegrees: tilt off vertical when the muzzle overhangs the lip.
+BOT_FOLLOWER_LIP_AIM_DEGREES 24
+// PathFollower.FloorUnder's scan, in px below the origin: the muzzle (20)
+// to a little past the feet.
+BOT_FOLLOWER_FLOOR_SCAN_FROM 20
+BOT_FOLLOWER_FLOOR_SCAN_TO 32
+// NavPlan.DecideByCrowd, the default plan PathFollower.Plan passes NavSearch.Find.
+BOT_FOLLOWER_NAV_PLAN 0
+
+// StickyModel.Launch: measured vertical speed one tick after jump-and-detonate.
+BOT_STICKY_LAUNCH -14.46
+// ClassStats.RocketJumpGravity, for StickyModel.Apex.
+BOT_STICKY_APEX_GRAVITY 0.54
