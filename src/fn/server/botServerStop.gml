@@ -13,3 +13,4 @@ ds_list_destroy(global.botJoiningTeam);
 ds_list_destroy(global.botJoiningClass);
 ds_list_destroy(global.botJoiningSince);
 botNavFree();
+botPolicyNetFree();

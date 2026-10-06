@@ -4,7 +4,7 @@ var char, keys, dir, dist, net;
 char = argument0.object;
 if (char == -1)
 {
-    botThink(argument0, noone);
+    botThink(argument0, -1);
     exit;
 }
 botThink(argument0, char);

@@ -16,7 +16,7 @@ BOT_POLICY_MAX_NETS 8            // a sanity bound on checkpoints loaded
 // gg2-server defaults 10000 with a policy decision priced at 7 us; a GML
 // decision costs about a millisecond, so the same 10 ms would buy ten of them
 // a tick. 4000 is about 12% of a 33 ms tick.
-BOT_ARBITER_DEFAULT_US 4000
+BOT_ARBITER_DEFAULT_US 10000
 // What one observation is assumed to cost before any decision has been
 // timed. The forward pass is timed at load; the observation cannot be (no
 // character exists then).
