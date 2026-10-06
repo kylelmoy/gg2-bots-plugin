@@ -236,7 +236,9 @@ function main() {
   const out = assemble();
   if (flag('--zip')) {
     const { makeZip } = require('./zip.js');
-    const entries = walk(out).map((f) => ({
+    // Nav files are not shipped: they are 180 MB for the stock maps alone, and
+    // the generator writes any map's in ~0.2 s the first time it is played.
+    const entries = walk(out).filter((f) => !f.split(path.sep).join('/').includes('/bots/nav/')).map((f) => ({
       name: path.relative(path.dirname(out), f).split(path.sep).join('/'),
       data: fs.readFileSync(f),
     }));
