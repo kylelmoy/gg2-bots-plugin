@@ -1,0 +1,60 @@
+// The nav module's own constants: C# private consts and the GML-only
+// bookkeeping values the port needs. generated.txt has the NAV_*/BOT_* values
+// shared with gg2-server; nothing here duplicates one of those.
+
+// NavGraph.FeetOffset: how far below a character's origin its feet are. A
+// literal in the reference GML, which is why it is not in NavConstants.
+NAV_FEET_OFFSET 23
+// NavGraph.KeyStride: the navEdgeKey multiplier.
+NAV_KEY_STRIDE 100000
+
+// "Infinity". GM8 has none (and no exponent literals). Every cost the layer
+// handles is far below this; anything at or above it means "no route".
+NAV_INF 1000000000
+
+// NavSearch.PopGuard and NavSearch.IncumbentTolerance.
+NAV_SEARCH_POP_GUARD 100000
+NAV_SEARCH_INCUMBENT_TOLERANCE 0.000001
+
+// Columns of global.navSearchScratch (a ds_grid NAV_SEARCH_FIELDS x nodes):
+// NavSearch's _gScore, _cameFrom, _closed, _liveCost and _walk.
+NAV_SEARCH_G 0
+NAV_SEARCH_FROM 1
+NAV_SEARCH_CLOSED 2
+NAV_SEARCH_LIVE 3
+NAV_SEARCH_WALK 4
+NAV_SEARCH_FIELDS 5
+
+// NavPlan.
+NAV_PLAN_DECIDE_BY_CROWD 0
+NAV_PLAN_CHAIN_BOUNDS_SEARCH 1
+NAV_PLAN_CHAIN_OR_SEARCH 2
+
+// The .dist file (docs/NAVFILES.md).
+NAV_DIST_VERSION 1
+NAV_DIST_HEADER_BYTES 28
+// A stored cost is floor(cost * 16); this is one step of it.
+NAV_DIST_SCALE 16
+NAV_DIST_QUANTUM 0.0625
+NAV_DIST_UNREACHABLE 4294967295
+// NavDistances.NoHop.
+NAV_DIST_NO_HOP 65535
+// NavDistanceSet.DoubleJumpBit / RocketJumpBit / StickyJumpBit / Profiles.
+NAV_DIST_DOUBLE_JUMP_BIT 1
+NAV_DIST_ROCKET_JUMP_BIT 2
+NAV_DIST_STICKY_JUMP_BIT 4
+NAV_DIST_PROFILES 8
+
+// botNavMapCheck: how often (virtual ticks) to look for a graph file that is
+// not there yet, and how long (ms) to wait on a launched gg2-navgen.
+NAV_RETRY_TICKS 150
+NAV_GEN_TIMEOUT_MS 60000
+
+// BotLanes.Penalty and BotLanes.SweepLegs.
+BOT_LANES_PENALTY 1.75
+BOT_LANES_SWEEP_LEGS 300
+// Columns of botLanesDerive's Dijkstra scratch grid.
+BOT_LANES_DIST 0
+BOT_LANES_FROM 1
+BOT_LANES_CLOSED 2
+BOT_LANES_FIELDS 3
