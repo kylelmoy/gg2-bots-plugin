@@ -20,7 +20,7 @@
 // This bot's OWN route comes out of the occupancy counts before it searches,
 // or it is charged extra for the path it is already walking and the whole team
 // churns lanes every re-plan.
-var p, px, py, qTeam, qIntel, qSetup, qDJ, qRJ, qSJ, thrash, start, goal, ok;
+var p, px, py, qTeam, qIntel, qSetup, qDJ, qRJ, qSJ, thrash, start, goal, ok, occ, table;
 p = argument0;
 px = argument1;
 py = argument2;
@@ -83,8 +83,12 @@ p.botPathReplans += 1;
 // NavSearch.Find(start, goal, query, _scratch, Blacklist,
 // occupancy?.Counts(query.Team), Lane, Distances?.For(query)) - see
 // docs/path.md, "Assumptions about nav", for how each is passed.
+occ = -1;
+if (global.botOccupancyOn)
+    occ = botOccupancyCounts(qTeam);
+table = navDistFor(qTeam, qIntel, qSetup, qDJ, qRJ, qSJ);
 ok = navSearchFind(start, goal, qTeam, qIntel, qSetup, qDJ, qRJ, qSJ,
-    p.botFollowerScratch, p.botPathBlacklist, true, p.botFollowerLane,
+    p.botFollowerScratch, p.botPathBlacklist, occ, p.botFollowerLane, table,
     BOT_FOLLOWER_NAV_PLAN);
 if (!ok)
 {

@@ -145,10 +145,14 @@ function compile({ stubMissing = false } = {}) {
       fs.writeFileSync(path.join(BUILD, 'code', 'fn', `${name}.gml`), `// STUB for lint: first called at ${missing.get(name)}\n`);
     }
   }
+  const arity = new Map();
+  const allCalls = [];
   for (const [name, f] of funcs) {
     const src = fs.readFileSync(f, 'utf8');
     const r = transpile(src, rel(f), names, { isFunction: true, constants });
     if (r.errors) { errors.push(...r.errors); continue; }
+    arity.set(name, r.arity);
+    for (const c of r.calls) allCalls.push({ ...c, file: rel(f) });
     fs.writeFileSync(path.join(BUILD, 'code', 'fn', `${name}.gml`), r.code);
     lines.push(`fn ${name} code/fn/${name}.gml`);
   }
@@ -156,10 +160,19 @@ function compile({ stubMissing = false } = {}) {
     const src = fs.readFileSync(h.file, 'utf8');
     const r = transpile(src, rel(h.file), names, { isFunction: false, constants });
     if (r.errors) { errors.push(...r.errors); continue; }
+    for (const c of r.calls) allCalls.push({ ...c, file: rel(h.file) });
     const out = `${h.object}__${h.event}.gml`;
     fs.writeFileSync(path.join(BUILD, 'code', 'hooks', out), r.code);
     const [type, numb] = EVENTS[h.event];
     lines.push(`hook ${h.object} ${type} ${numb} code/hooks/${out}`);
+  }
+  // Arity: a call passing fewer arguments than the function reads leaves it
+  // reading whatever the last call left in global.botA<n>, silently. More is a
+  // sign of disagreement but is harmless (trailing arguments the callee ignores).
+  for (const c of allCalls) {
+    if (!arity.has(c.name)) continue;
+    const want = arity.get(c.name);
+    if (c.args < want) errors.push(`${c.file}:${c.line}: ${c.name} takes ${want} argument(s), called with ${c.args}`);
   }
   // Functions first: a hook may call any of them the moment it is attached.
   lines.sort((a, b) => (a.startsWith('fn') === b.startsWith('fn') ? 0 : a.startsWith('fn') ? -1 : 1));

@@ -262,6 +262,7 @@ function splitArgs(toks, open, close) {
 function transpile(src, file, funcs, { isFunction = false, constants = new Map() } = {}) {
   const toks = tokenize(src, file);
   const edits = []; // { from, to, replacement } over token indices, inclusive
+  const calls = []; // { name, args, line } for the arity check
   const errors = [];
   const consumedReturn = new Set();
   const err = (tok, msg) => errors.push(`${file}:${tok.line}: ${msg}`);
@@ -295,6 +296,7 @@ function transpile(src, file, funcs, { isFunction = false, constants = new Map()
       continue;
     }
     const args = splitArgs(toks, open, close);
+    calls.push({ name: t.text, args: args.length, line: t.line });
     if (args.length > MAX_ARGS) {
       err(t, `call to ${t.text} has ${args.length} arguments; the limit is ${MAX_ARGS}`);
       continue;
@@ -417,7 +419,7 @@ function transpile(src, file, funcs, { isFunction = false, constants = new Map()
   // Calls inside the replacements were rewritten from the original argument
   // text, which may itself name argumentN.
   if (isFunction) out = out.replace(/\bargument([0-9]+)\b/g, 'botArg$1');
-  return { code: out };
+  return { code: out, calls, arity: isFunction ? (usedArgs.size ? Math.max(...usedArgs) + 1 : 0) : 0 };
 }
 
 function renameArg(tok, isFunction, constants) {
