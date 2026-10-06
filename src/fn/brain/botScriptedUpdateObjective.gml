@@ -52,7 +52,7 @@ if (p.botScriptedGoalWasRepost and !p.botScriptedRepostJudged
 // Only the medic reads the combat target: its follow position is on the far
 // side of its patient from the enemy.
 foe = noone;
-if (p.botCombatTargetExists and p.botCombatTargetKind == BOT_TARGET_CHARACTER)
+if (p.botCombatTargetExists and p.botCombatTargetKind == BOT_TARGET_KIND_CHARACTER)
     foe = p.botCombatTargetSlot;
 
 underFire = botScriptedUnderFireWithNoAnswer(p, char);
