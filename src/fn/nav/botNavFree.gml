@@ -1,10 +1,10 @@
 // botNavFree(): server stop; frees everything botNavInit and the loads made.
-// A running generator is left alone.
 if (!variable_global_exists("botNavAlive"))
     exit;
 if (!global.botNavAlive)
     exit;
 global.botNavAlive = false;
+navGenFree();
 navGraphFree();
 navDistFree();
 botLanesFree();
@@ -22,5 +22,4 @@ global.botOccupancyRed = -1;
 global.botOccupancyBlue = -1;
 global.botNavMarker = noone;
 global.botNavKey = "";
-global.botNavGenKey = "";
 global.botNavGeneration += 1;

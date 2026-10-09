@@ -46,9 +46,8 @@ NAV_DIST_STICKY_JUMP_BIT 4
 NAV_DIST_PROFILES 8
 
 // botNavMapCheck: how often (virtual ticks) to look for a graph file that is
-// not there yet, and how long (ms) to wait on a launched gg2-navgen.
+// not there yet.
 NAV_RETRY_TICKS 150
-NAV_GEN_TIMEOUT_MS 60000
 
 // BotLanes.Penalty and BotLanes.SweepLegs.
 BOT_LANES_PENALTY 1.75

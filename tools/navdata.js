@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 //=============================================================================
-// navdata.js - put the nav generator and the shipped maps' nav files in build/.
+// navdata.js - put the C# nav generator and its nav files for the shipped maps
+// in build/. The plugin no longer ships the exe (its generator is GML); this
+// is the reference tools/navbench.js times and compares the GML against.
 //
 //   node tools/navdata.js [--server <C# server worktree>] [--exe <gg2-navgen.exe>] [--publish]
 //
@@ -11,7 +13,7 @@
 //    to build/data/navgen/gg2-navgen.exe.
 // 3. Empties build/data/nav and runs `gg2-navgen --all --out build/data/nav`.
 //
-// tools/build.js copies build/data/{navgen,nav,policy} into the plugin. Nothing
+// tools/build.js installs build/data/nav into a dev game (never the zip). Nothing
 // here is committed: build/ is gitignored. docs/NAVFILES.md has the formats.
 //=============================================================================
 'use strict';

@@ -14,8 +14,9 @@
 //    error dialog the first time the event runs, so nothing is installed unless
 //    this passes.
 // 3. dist/Plugins/ is assembled: bots.gml (the bootstrap the game's loader
-//    runs) and bots/ (the code, the manifest, the host menu tab, nav data,
-//    policy weights and the nav generator).
+//    runs) and bots/ (the code, the manifest, the host menu tab, nav data and
+//    policy weights). The nav generator is GML (src/fn/navgen); nothing
+//    native ships.
 // 4. dist/Plugins/ is copied over <game>/Plugins/. --zip also writes
 //    dist/gg2-bots.zip for release.
 //=============================================================================
@@ -33,6 +34,16 @@ const BUILD = path.join(ROOT, 'build');
 const DIST = path.join(ROOT, 'dist');
 const LINT = process.env.GML_LINT || 'D:/Code/gg2-agent/tools/gml-lint.js';
 const DEFAULT_GAME = process.env.GG2_GAME || 'D:/Code/Gang-Garrison-2/Source/build';
+
+// The nav graph keys of the maps a stock game ships, every area (what
+// `gg2-navgen --all` writes); --zip refuses to build without all of them.
+const STOCK_NAV_KEYS = [
+  'arena_lumberyard_a1', 'arena_montane_a1', 'cp_dirtbowl_a1', 'cp_dirtbowl_a2', 'cp_dirtbowl_a3',
+  'cp_egypt_a1', 'ctf_2dfort_a1', 'ctf_avanti_a1', 'ctf_classicwell_a1', 'ctf_conflict_a1',
+  'ctf_eiger_a1', 'ctf_oldfort_a1', 'ctf_orange_a1', 'ctf_truefort_a1', 'ctf_waterway_a1',
+  'dkoth_atalia_a1', 'dkoth_sixties_a1', 'gen_destroy_a1', 'gg_debug_a1', 'koth_corinth_a1',
+  'koth_gallery_a1', 'koth_harvest_a1', 'koth_valley_a1', 'tdm_mantic_a1',
+];
 
 // File name -> [event type constant, event number]
 const EVENTS = {
@@ -199,9 +210,9 @@ function assemble() {
   fs.copyFileSync(path.join(SRC, 'bots.gml'), path.join(out, 'bots.gml'));
   fs.copyFileSync(path.join(SRC, 'menu.gml'), path.join(out, 'bots', 'menu.gml'));
   copyDir(path.join(BUILD, 'code'), path.join(out, 'bots', 'code'));
-  // Static data shipped beside the code: policy weights, nav graphs, the
-  // generator. Each is produced by its own tool into build/ or data/.
-  for (const d of ['policy', 'nav', 'navgen']) {
+  // Static data shipped beside the code: policy weights and nav graphs, each
+  // produced by its own tool into build/data/.
+  for (const d of ['policy', 'nav']) {
     const from = path.join(BUILD, 'data', d);
     if (fs.existsSync(from)) copyDir(from, path.join(out, 'bots', d));
   }
@@ -220,6 +231,10 @@ function install(game, out) {
   // leave nav/ alone apart from adding to it: it also holds graphs the
   // generator made for custom maps on this machine.
   rmrf(path.join(dest, 'bots', 'code'));
+  // Every .txt in policy/ loads as a network, so a renamed one must not linger.
+  rmrf(path.join(dest, 'bots', 'policy'));
+  // gg2-navgen.exe shipped here until the generator was ported to GML.
+  rmrf(path.join(dest, 'bots', 'navgen'));
   copyDir(out, dest);
   console.log(`build: installed to ${dest}`);
 }
@@ -250,9 +265,22 @@ function main() {
   const out = assemble();
   if (flag('--zip')) {
     const { makeZip } = require('./zip.js');
-    // Nav files are not shipped: they are 180 MB for the stock maps alone, and
-    // the generator writes any map's in ~0.2 s the first time it is played.
-    const entries = walk(out).filter((f) => !f.split(path.sep).join('/').includes('/bots/nav/')).map((f) => ({
+    // The stock maps' graphs ship (1.1 MB deflated), so bots walk on them from
+    // the first round. Their distance tables do not (32 MB deflated): the GML
+    // generator derives a missing .dist in the background the first time a
+    // map is played (docs/NAVFILES.md).
+    const navDir = path.join(out, 'bots', 'nav');
+    const missing = STOCK_NAV_KEYS.filter((k) => !fs.existsSync(path.join(navDir, `${k}.txt`)));
+    if (missing.length) {
+      console.error(`build: no nav graph for ${missing.join(', ')}; run tools/navdata.js first`);
+      process.exit(1);
+    }
+    const shipped = (f) => {
+      const p = f.split(path.sep).join('/');
+      if (!p.includes('/bots/nav/')) return true;
+      return STOCK_NAV_KEYS.includes(path.basename(p, '.txt')) && p.endsWith('.txt');
+    };
+    const entries = walk(out).filter(shipped).map((f) => ({
       name: path.relative(path.dirname(out), f).split(path.sep).join('/'),
       data: fs.readFileSync(f),
     }));

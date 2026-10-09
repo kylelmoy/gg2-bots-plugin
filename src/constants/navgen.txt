@@ -1,0 +1,58 @@
+// navgen: the nav graph generator (GG2.Nav's NavGenerator and friends) and
+// the distance tables gg2-navgen wrote (PluginDistFile). Shared values are in
+// generated.txt; these are the C#'s private consts and the GML's own.
+
+// Arc models (NavJumpModel, NavDoubleJumpModel, NavRocketJumpModel.ForRocket).
+NAV_GEN_JUMP 0
+NAV_GEN_DJ 1
+NAV_GEN_RJ 2
+
+// NavCharacter: Character.Create's baseControl/baseFriction, the rest
+// threshold, the run-up integration cap and the classes' baseRunPower.
+NAV_GEN_BASE_CONTROL 0.85
+NAV_GEN_BASE_FRICTION 1.15
+NAV_GEN_REST_SPEED 0.195
+NAV_GEN_INTEGRATION_CAP 240
+NAV_GEN_RUNPOWER_HEAVY 0.8
+NAV_GEN_RUNPOWER_SOLDIER 0.9
+NAV_GEN_RUNPOWER_SCOUT 1.4
+
+// NavInstances: the collider sprites' sizes (origin 0,0, full-image masks)
+// and MoveBox's default push.
+NAV_GEN_BAR_LONG 60
+NAV_GEN_BAR_SHORT 6
+NAV_GEN_BOX 42
+NAV_GEN_SETUP_GATE 32
+NAV_GEN_DEFAULT_PUSH 5
+
+// NavStamp.
+NAV_GEN_STAMP_SOLID 1
+NAV_GEN_STAMP_PLATFORM 2
+NAV_GEN_STAMP_LETHAL 3
+NAV_GEN_STAMP_DOOR_LEFT 4
+NAV_GEN_STAMP_DOOR_RIGHT 5
+NAV_GEN_STAMP_GATE 6
+NAV_GEN_STAMP_MOVEBOX 7
+
+// navGenStep's stages, in order.
+NAV_GEN_STAGE_MASK 0
+NAV_GEN_STAGE_CLEARANCE 1
+NAV_GEN_STAGE_NODES 2
+NAV_GEN_STAGE_SIMPLE 3
+NAV_GEN_STAGE_JUMP 4
+NAV_GEN_STAGE_DJ 5
+NAV_GEN_STAGE_RJ 6
+NAV_GEN_STAGE_WRITE 7
+NAV_GEN_STAGE_GRAPH_DONE 8
+NAV_GEN_STAGE_DIST 9
+NAV_GEN_STAGE_DIST_WRITE 10
+NAV_GEN_STAGE_DONE 11
+
+// Work per server tick, in ms of current_time. current_time only advances in
+// ~16 ms steps on Windows, so any value under 16 means "until the clock
+// ticks": measured, generation took ~45% of a 30 fps server's wall time and
+// held 30 fps. The graph and the tables both run in the background; bots
+// fight without walking until the graph is in, and route by straight line
+// until the tables are.
+NAV_GEN_BUDGET_MS 6
+

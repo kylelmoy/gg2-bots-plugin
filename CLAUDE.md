@@ -11,7 +11,8 @@ host needs it; clients are stock.
   memory, the order of a tick. Everything else assumes it.
 - `D:/Code/gg2-agent/GML.md` - the GM8 dialect's traps. Every one of them has
   cost a day somewhere.
-- `docs/NAVFILES.md` - the nav files and `gg2-navgen.exe`.
+- `docs/NAVFILES.md` - the nav files, the GML generator that writes them and
+  `gg2-navgen.exe`, the C# reference it is checked against.
 - The C# being ported: `D:/Code/gg2-server/src/GG2.Bots/`. It is the spec.
 
 ## Layout
@@ -24,6 +25,7 @@ host needs it; clients are stock.
 | `src/constants/*.txt` | compile-time constants; `generated.txt` comes from gg2-server |
 | `tools/build.js` | transpile, lint, assemble `dist/Plugins/`, install into the game |
 | `tools/botc.js` | the transpiler; `tools/test-botc.js` tests it |
+| `tools/navbench.js` | time `src/fn/navgen` against `gg2-navgen.exe` on a live server and compare the files (`tools/navcompare.js`) |
 | `docs/departures/<module>.md` | where and why the GML differs from the C# |
 
 ## Build

@@ -15,10 +15,13 @@ client needs no plugin, no download and no restart.
 2. Host a game, from the menu or with `-dedicated`. Bots join once at least one
    person is in the game (on a listen server, that is you).
 
-Nothing else is required. The zip carries `gg2-navgen.exe`, which builds a
-map's navigation data the first time the map is played (a fraction of a
-second; bots fight without walking until it is ready). It is a Windows
-program, like the game.
+Nothing else is required: the plugin is GML only. The zip carries the
+navigation graph of every stock map, so bots walk from the first round; the
+distance tables that speed up their route-finding are built in the background
+the first time each map is played (a minute or so) and kept for next time. A
+custom map's graph is built the same way: bots fight without walking until it
+is ready, from a few seconds on a small map to about 40 seconds on a large
+one.
 
 ## What they do
 
@@ -44,8 +47,8 @@ the C# server.
 
 All in the game's own `gg2.ini`, under the same keys the C# server reads, so one
 config section serves either server. Every key is optional. The Bots tab of
-the Host Game menu edits the everyday ones (`Enabled` to `Mode`, `EngagesBots`
-and `NavGenerate`).
+the Host Game menu edits the everyday ones (`Enabled`, `FillToPlayers`,
+`MaxBots`, `Difficulty` and `NamePrefix`).
 
 | `[Bots]` | Default | |
 |---|---|---|
@@ -96,14 +99,16 @@ In short:
   once when hosting starts and called with `event_perform_object`.
 - **The C# is the specification.** Each module is a port of the C# server's
   `GG2.Bots`, read against the game's own objects.
-- **Navigation data comes from the C# server's own generator**,
-  `gg2-navgen.exe`, built from a checkout of that server.
+- **Navigation data is built in the game** by a port of the C# server's own
+  generator, which produces the same graph as the C# on every stock map
+  (`tools/navbench.js` checks it against the C# build, `gg2-navgen.exe`).
 
 ## Building
 
 ```
 node tools/convert-policy.js        the C# server's checkpoints -> build/data/policy
-node tools/navdata.js [--publish]   gg2-navgen.exe -> build/data/navgen (+ every stock map's nav data)
+node tools/navdata.js [--publish]   the reference gg2-navgen.exe -> build/data/navgen (+ stock maps' nav data)
+node tools/navbench.js [map[:area]] time the GML generator against the exe, compare the files
 node tools/build.js                 transpile, lint, install into a dev game
 node tools/build.js --zip           and write dist/gg2-bots.zip
 node tools/test-botc.js             transpiler tests
@@ -111,4 +116,4 @@ node tools/livecheck.js             drive a running gg2_session through maps
 ```
 
 Needs Node 18+, Game Maker 8 and a GML linter (`GML_LINT`), and the C#
-server's source (for the checkpoints and the generator).
+server's source (for the checkpoints and the reference generator).

@@ -1,15 +1,22 @@
 # Nav files and the generator
 
-Building a nav graph is seconds of work in GML and a fraction of a second in
-C#, so the plugin never builds one. `gg2-navgen.exe` - gg2-server's own
-generator (`GG2.Nav`) behind a small command line, built in a gg2-server
-worktree - writes the files, and the plugin only reads them.
+The plugin builds a map's nav graph and distance tables itself, in GML
+(`src/fn/navgen`, a port of gg2-server's `GG2.Nav` generator and of
+`gg2-navgen.exe`'s distance file; departures in `docs/departures/navgen.md`),
+in the background the first time a map is played, and keeps them as files.
+`gg2-navgen.exe` - gg2-server's own generator behind a small command line - is
+no longer shipped; it is the reference `tools/navbench.js` checks the GML
+against, and it still writes the stock maps' files for a dev game
+(`tools/navdata.js`).
 
 ## Where
 
-`Plugins/bots/nav/` beside the game. Shipped maps' files are generated at
-release time and shipped; anything else (a custom map) is generated on this
-machine the first time the map is played, if `[Bots] NavGenerate` is on.
+`Plugins/bots/nav/` beside the game. The zip ships the graph (`.txt`) of
+every stock map area (1.1 MB deflated; `tools/build.js --zip` refuses to build
+without all 24, which `tools/navdata.js` writes). It ships no `.dist` (32 MB
+deflated): a stock map's tables, and a custom map's graph and tables, are
+generated on the hosting machine the first time the map is played there, if
+`[Bots] NavGenerate` is on, and kept there.
 
 ## The key
 
@@ -67,9 +74,15 @@ with `MathF.BitDecrement`); flooring keeps that. The effect is a heuristic up to
 
 ## Writing them
 
-Both files are written to a temporary name and renamed into place, `.dist`
-first and `.txt` last, so the plugin - which treats a map as ready when
-`<key>.txt` exists - never reads half a file.
+The GML writes each file to `<key>.<ext>.tmp` and renames it into place, so
+the plugin - which treats a map as ready when `<key>.txt` exists - never reads
+half a file. The graph is written first and installed at once; the tables
+follow when they are done (`.dist`'s header names the graph's node and edge
+counts, so a stale one is refused). A graph whose `.dist` is missing gets its
+tables generated the next time it is loaded.
+
+The reference generator writes the same two files, `.dist` first and `.txt`
+last:
 
 ```
 gg2-navgen --map <name-or-png-path> [--area <n>] --key <key> --out <dir>
@@ -95,6 +108,31 @@ gg2-navgen --all --out <dir>          every map gg2-server ships, every area
 
 ### What it costs
 
+Measured 2026-10-08 on the dev machine with `tools/navbench.js` (generation
+stepped back to back, so CPU time) against the published exe, all 24 stock
+map areas. Every graph is the exe's (same nodes and edge rows, floats within
+1e-13); every table cost is the exe's; 0.02-0.57% of next hops differ on ties.
+
+| | GML graph | GML tables | exe, graph + tables |
+|---|---|---|---|
+| `gg_debug` | 1.2 s | 0.1 s | 43 ms |
+| `ctf_2dfort` (378 nodes) | 7.7 s | 11.0 s | 106 ms |
+| `ctf_truefort` (687 nodes) | 16.8 s | 36.0 s | 235 ms |
+| `cp_dirtbowl` area 2 (837 nodes) | 15.6 s | 19.2 s | 199 ms |
+| `ctf_conflict` (762 nodes, the slowest graph) | 17.9 s | 36.8 s | 226 ms |
+| `ctf_waterway` (the slowest tables) | 17.1 s | 48.2 s | 255 ms |
+| all 24 | 246 s | 398 s | 3.4 s |
+
+So the GML is roughly 70x the exe on the graph and 150x on the tables. 90% of
+the graph is the three jump fans (the clearance walk and the run-up
+integration, a few million interpreted steps). In a live game generation runs
+a slice a tick (`NAV_GEN_BUDGET_MS`, in practice one ~16 ms clock step) and
+took ~45% of the server's wall time without dropping it below 30 fps; the
+longest single slice was 47 ms. On ctf_2dfort bots were walking ~30 s after
+the map loaded and had their tables at ~60 s.
+
+The reference generator alone:
+
 Measured 2026-10-06, the published exe on the dev machine, warm disk:
 
 | | |
@@ -105,10 +143,9 @@ Measured 2026-10-06, the published exe on the dev machine, warm disk:
 | `--all` | ~0.5-0.8 s; 48 files, 183.6 MB (about 31 MB deflated, almost all `.dist`) |
 
 The `.dist` files are the bulk: `6 * N * N` bytes per table, 2-4 tables a
-map. They deflate about 6:1 in the zip; a smaller distribution could ship
-only the `.txt` files and run `--all` on first start instead (half a second).
+map. They deflate about 6:1, which is why the zip ships graphs but no tables.
 
-## Building the generator
+## Building the reference generator
 
 The C# is in a gg2-server worktree, `D:/Code/gg2-server-botsplugin`, branch
 `bots-plugin-navgen` (not merged into gg2-server's main): project
@@ -124,7 +161,7 @@ dotnet publish D:/Code/gg2-server-botsplugin/src/GG2.NavGen -c Release -r win-x6
 # copy it to build/data/navgen/ and generate build/data/nav/ (--publish does the step above first)
 node tools/navdata.js [--publish] [--server <worktree>] [--exe <path>]
 
-node tools/build.js          # ships build/data/{navgen,nav,policy}
+node tools/build.js          # installs build/data/{nav,policy} into a dev game
 ```
 
 Neither the exe nor the generated files are committed; `build/` is

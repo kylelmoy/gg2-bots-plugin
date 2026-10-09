@@ -27,9 +27,8 @@ global.botNavKey = "";            // key for the current room
 global.botNavMD5 = "";            // currentMapMD5 at room load
 global.botNavGaveUp = false;      // file for this key refused; stop retrying
 global.botNavRetryAt = 0;         // botTick of next look for a missing file
-global.botNavGenKey = "";         // key gg2-navgen is building
-global.botNavGenSince = 0;        // current_time at launch
-global.botNavGenLaunched = ds_map_create(); // keys launched this session
+global.botNavGenLaunched = ds_map_create(); // keys generated this session
+navGenInit();
 
 // Search scratch; per-node grid sized by navGraphTryLoad.
 global.navSearchScratch = -1;

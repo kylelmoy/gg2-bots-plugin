@@ -31,7 +31,7 @@ onward, `ds_grid_get(global.botNavEdgeStart, 1, n)` of them.
 |---|---|
 | `botNavInit()` | server start, after `botConfigLoad`. No graph yet. |
 | `botNavFree()` | server stop. Safe twice. |
-| `botNavMapCheck()` | every 30 Hz tick. Notices a new room (a new `CustomMapO` instance), frees the graph, resets occupancy (and every bot's `botPathOccupiedTeam`) and lanes, bumps the generation, loads `<key>.txt`/`.dist` from `global.botDir + "nav\"`, or runs `gg2-navgen` (once per key per session) and polls up to 60 s. |
+| `botNavMapCheck()` | every 30 Hz tick. Notices a new room (a new `CustomMapO` instance), frees the graph, resets occupancy (and every bot's `botPathOccupiedTeam`) and lanes, bumps the generation, loads `<key>.txt`/`.dist` from `global.botDir + "nav\"`, or generates them (`navGen*`, below; once per key per session), a slice a tick. |
 
 `botNavLoad()` is internal to the map check.
 
@@ -102,3 +102,18 @@ when not - `botPathInit` must set TEAM_SPECTATOR). Occupancy owns that field.
 | `botLanesCosts(lane)` | the lane's column for `navSearchFind` (wraps), or -1 with no lanes |
 | `botLanesFree()` | drop them; the map check calls it |
 | `botLanesSweep` | internal |
+
+## Generator (`navGen*`, `src/fn/navgen/`)
+
+GG2.Nav's `NavGenerator` and the plugin's distance file, in GML
+(docs/departures/navgen.md). Driven by `botNavMapCheck`; nothing else calls it.
+
+| function | |
+|---|---|
+| `navGenInit()`, `navGenFree()` | with `botNavInit`/`botNavFree`; `navGenFree` also aborts a run (the map check calls it on every new room) |
+| `navGenStart(key, distOnly)` | begin `<key>.txt` from the live room (then its tables), or only the tables for the installed graph. False if there is no walkmask |
+| `navGenStep(budgetMs)` | work until the budget is spent. `global.navGenStage` is `NAV_GEN_STAGE_GRAPH_DONE` when `<key>.txt` is written (install it, then `navGenDistSetup()` or `navGenFree()`), `NAV_GEN_STAGE_DONE` when finished (`global.navGenDistOk`: `<key>.dist` written) |
+| `navGenDistSetup()` | start the tables for the installed graph |
+
+Timing: `global.navGenMs` (time stepped), `global.navGenStageAt[stage]`
+(`current_time` each stage began). `tools/navbench.js` reads both.

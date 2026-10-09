@@ -1,10 +1,11 @@
 // botNavMapCheck(): every tick. On a new room, installs that map+area's graph -
 // MapChanged's nav half. A new CustomMapO instance id marks a new room (map
 // globals change at round end, before the room does).
-// No <key>.txt: launch gg2-navgen once per key (if enabled and present) and
-// poll until NAV_GEN_TIMEOUT_MS, else look every NAV_RETRY_TICKS. A refused
-// file is not retried until the next room.
-var marker, key, txt, ok, prog, mapArg, args;
+// No <key>.txt: generate it in GML (navGen*, once per key per session, if
+// NavGenerate is on), a slice a tick, then its distance tables the same way;
+// else look every NAV_RETRY_TICKS. A refused file is not retried until the
+// next room. A graph whose <key>.dist is missing gets its tables generated.
+var marker, key, txt, ok;
 if (!variable_global_exists("botNavAlive"))
     exit;
 if (!global.botNavAlive)
@@ -15,6 +16,7 @@ marker = instance_find(CustomMapO, 0);
 if (marker != global.botNavMarker)
 {
     global.botNavMarker = marker;
+    navGenFree();
     navGraphFree();
     botOccupancyReset();
     botLanesFree();
@@ -25,40 +27,60 @@ if (marker != global.botNavMarker)
     global.botNavKey = key;
     global.botNavGaveUp = false;
     global.botNavRetryAt = 0;
-    global.botNavGenKey = "";
     global.botNavGeneration += 1;
+}
+key = global.botNavKey;
+
+if (global.navGenActive)
+{
+    navGenStep(NAV_GEN_BUDGET_MS);
+    if (global.navGenStage == NAV_GEN_STAGE_GRAPH_DONE)
+    {
+        ok = botNavLoad();
+        if (!ok)
+        {
+            global.botNavGaveUp = true;
+            navGenFree();
+        }
+        else if (global.botNavDistancesOn && !global.navDistReady)
+            navGenDistSetup();
+        else
+            navGenFree();
+    }
+    else if (global.navGenStage == NAV_GEN_STAGE_DONE)
+    {
+        if (global.navGenDistOk && global.botNavReady)
+        {
+            navDistLoad(global.botNavDir + key + ".dist");
+            global.navDistLoadedKey = key + "/" + string(global.botNavNodeCount) + "/" + string(global.botNavEdgeCount);
+        }
+        else if (!global.botNavReady)
+            global.botNavGaveUp = true;
+        navGenFree();
+    }
+    exit;
 }
 
 if (global.botNavReady)
-    exit;
-if (global.botNavGaveUp)
-    exit;
-key = global.botNavKey;
-txt = global.botNavDir + key + ".txt";
-
-// gg2-navgen writes .txt last, so its existence means both files are complete.
-if (global.botNavGenKey == key)
 {
-    if (file_exists(txt))
+    // Loaded from a file whose tables are missing (or stale): make them.
+    if (global.botNavDistancesOn && global.botNavGenerate && !global.navDistReady)
     {
-        global.botNavGenKey = "";
-        ok = botNavLoad();
-        if (!ok)
-            global.botNavGaveUp = true;
-        exit;
-    }
-    if (current_time - global.botNavGenSince > NAV_GEN_TIMEOUT_MS)
-    {
-        global.botNavGenKey = "";
-        global.botNavRetryAt = global.botTick + NAV_RETRY_TICKS;
+        if (!ds_map_exists(global.botNavGenLaunched, key + ".dist"))
+        {
+            ds_map_add(global.botNavGenLaunched, key + ".dist", 1);
+            navGenStart(key, true);
+        }
     }
     exit;
 }
-
+if (global.botNavGaveUp)
+    exit;
 if (global.botTick < global.botNavRetryAt)
     exit;
 global.botNavRetryAt = global.botTick + NAV_RETRY_TICKS;
 
+txt = global.botNavDir + key + ".txt";
 if (file_exists(txt))
 {
     ok = botNavLoad();
@@ -71,17 +93,7 @@ if (!global.botNavGenerate)
     exit;
 if (ds_map_exists(global.botNavGenLaunched, key))
     exit;
-prog = global.botDir + "navgen\gg2-navgen.exe";
-if (!file_exists(prog))
-    exit;
-
-// Built-in map (empty MD5) by name; custom map by its PNG path.
-mapArg = global.botNavMap;
-if (global.botNavMD5 != "")
-    mapArg = working_directory + "\Maps\" + global.botNavMap + ".png";
-// No trailing backslash on --out: it would escape the closing quote.
-args = '--map "' + mapArg + '" --area ' + string(global.botNavArea) + ' --key ' + key + ' --out "' + global.botDir + 'nav"';
 ds_map_add(global.botNavGenLaunched, key, 1);
-execute_program(prog, args, false);
-global.botNavGenKey = key;
-global.botNavGenSince = current_time;
+ok = navGenStart(key, false);
+if (!ok)
+    global.botNavGaveUp = true;
