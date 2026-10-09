@@ -1,18 +1,8 @@
-// botObjectiveDeathmatch(player, char, class, targetChar): BotObjective.Deathmatch
-// - Team Deathmatch, where the objective is the other team. Returns `found`
-// (global.botRet) and the C#'s ref outputs: global.botRetX / global.botRetY
-// (the enemy's position), global.botRetAnchorX / AnchorY, global.botRetSpotMin /
-// SpotMax / SpotHigh and global.botRetUseSpot.
-//
-// `targetChar` is the Character of the combat half's live target, or -1/noone:
-// the caller resolves "is it alive" (C# `target is { } acquired &&
-// world.IsAlive(acquired)`). Without one, the nearest living enemy (C#
-// world.NearestEnemies: other players' living characters, any team but ours,
-// squared distance, the first of equals in instance order).
-//
-// A SPOT anchored on the enemy, never its own position: a goal of "walk onto
-// the enemy" walks a soldier inside its own minimum band, where BotClassKeys
-// refuses to fire, and leaves it there. Both roles hunt; there is nothing to defend.
+// botObjectiveDeathmatch(player, char, class, targetChar):
+// BotObjective.Deathmatch. Returns found (global.botRet); global.botRetX/Y
+// (enemy position), botRetAnchorX/Y, botRetSpotMin/SpotMax/SpotHigh,
+// botRetUseSpot. targetChar: live target's Character or -1/noone; without one,
+// the nearest living enemy. Goal is a spot anchored on the enemy.
 var bot, char, cls, foe, myTeam, best, d, dx, dy, selfX, selfY, minBand, range, high;
 bot = argument0;
 char = argument1;
@@ -56,8 +46,6 @@ if (foe == -1)
     }
 }
 
-// Nobody to hunt: no goal. A bot alone on the map stands still rather than
-// walking to where somebody used to be.
 if (foe == -1)
     return false;
 
@@ -69,12 +57,8 @@ global.botRetX = foe.x;
 global.botRetY = foe.y;
 global.botRetAnchorX = foe.x;
 global.botRetAnchorY = foe.y;
-// The generator's band: inside the weapon's reach rather than on its edge,
-// floored at the class's own minimum - the line that stops a point-blank standoff.
 global.botRetSpotMin = max(minBand, 1);
 global.botRetSpotMax = range * BOT_SPOT_BAND;
-// The one anchor in the cascade that is an opponent, so the class's own height
-// preference is exactly the question to ask.
 global.botRetSpotHigh = high;
 global.botRetUseSpot = true;
 return true;

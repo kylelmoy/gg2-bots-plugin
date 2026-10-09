@@ -1,8 +1,7 @@
 // botReflexInBlastBeam(selfX, selfY, px, py, forwardX, forwardY, sideX, sideY):
-// BotReflex.InBlastBeam - botInBlastBeam.gml. Is this point inside the volume
-// the airblast actually reflects: a BEAM BOT_AIRBLAST_NEAR..BOT_AIRBLAST_REACH
-// along the aim and BOT_AIRBLAST_HALFW either side of it (measured off the
-// running exe; there IS a near edge). botReflexIncomingProjectile inlines it.
+// BotReflex.InBlastBeam - is the point in the airblast beam:
+// BOT_AIRBLAST_NEAR..REACH along the aim, BOT_AIRBLAST_HALFW either side.
+// Inlined in botReflexIncomingProjectile.
 var dx, dy, fwd;
 dx = argument2 - argument0;
 dy = argument3 - argument1;

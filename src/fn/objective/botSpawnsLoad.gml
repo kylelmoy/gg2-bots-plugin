@@ -1,23 +1,9 @@
-// botSpawnsLoad(): SpawnPoints' constructor - the map's spawn points, read once
-// per map. The integrator calls it after every map load, once global.botNavReady
-// is true for the new map (offloadSpawnPoints has run by then: basicRoomSetup
-// calls it at room start).
-//
-// Source: the game's own resolved table, global.spawnPointsRed/Blue[0 (x) | 1 (y),
-// group] - ds_lists that offloadSpawnPoints.gml fills from `with(SpawnPointRed)`
-// / `with(SpawnPointBlue)`, after basicRoomSetup has destroyed every instance
-// outside the current map area. That is exactly the table SpawnPoints.cs
-// reproduces (doEventSpawn.gml resolves a PLAYER_SPAWN against it).
-//
-// Layout: global.botSpawnsGrid, 4 x global.botSpawnsN, one row per point:
-// [0] team (TEAM_RED/TEAM_BLUE), [1] group, [2] x, [3] y; red groups 0..4 then
-// blue groups 0..4, each group in instance order - SpawnPoints' own order, so a
-// nearest-point tie resolves as the C# resolves it.
-//
-// Also bumps global.botSpawnsGen, the map generation: a bot's held spot node
-// (botObjectiveSpotNode) and botGoalSpotReach's cache are both keyed on it,
-// because a node index means nothing in the next map's graph. The C# gets the
-// same effect by building a fresh BotObjective per bot per map.
+// botSpawnsLoad(): SpawnPoints' constructor - reads the map's spawn points from
+// global.spawnPointsRed/Blue (offloadSpawnPoints). Call after each map load.
+// global.botSpawnsGrid, 4 x global.botSpawnsN: [0] team, [1] group, [2] x, [3]
+// y; red groups 0..4 then blue, each in instance order (SpawnPoints' order).
+// Bumps global.botSpawnsGen, the map generation keying held spot nodes and
+// botGoalSpotReach.
 var t, g, i, n, total, xs, ys, cnt, tm;
 
 if (!variable_global_exists("botSpawnsGrid"))

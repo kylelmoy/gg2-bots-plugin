@@ -1,27 +1,11 @@
-// botPolicyNetLoadFile(path, label): load one converted checkpoint as tier
-// global.botPolicyNetCount. Returns its index, or -1 when it is refused.
-//
-// PolicyNetwork.Load's checks, against the file tools/convert-policy.js wrote
-// (docs/POLICY.md): format, action encoding, observation layout, head shape,
-// observation length, action repeat, layers that chain from 211 to 27. Every
-// check is a refusal. The simulation stamp is the converter's to refuse - it
-// pins the gg2-server build whose ObservationWriter this module transcribes -
-// and is only reported here: the GM8 game has no stamp of its own to compare.
-//
-// Then two things the C# never needed:
-// - a SELF-TEST. The file carries an observation and the logits the converter
-//   computed for it; the GML forward pass must reproduce them, or the
-//   checkpoint is refused. This is what proves, on the live engine, that the
-//   ds_grid region functions do what botPolicyNetAct assumes.
-// - a TIMING. The forward pass is run repeatedly for BOT_POLICY_TIMING_MS and
-//   priced in microseconds (current_time is coarse, so it is averaged), plus
-//   BOT_POLICY_OBS_COST_US for the observation: global.botPolicyNetCost[n],
-//   what the decision budget charges until real decisions refine it.
-//
-// Per tier n it sets: global.botPolicyNetLabel[n], ...Uuid[n], ...Repeat[n],
-// ...Layers[n], ...Trained[n, class] (0/1 for class 0..9), ...In[n, L],
-// ...Out[n, L], and the grids ...W[n, L] (weights), ...B[n, L] (bias),
-// ...T[n, L] (scratch the forward pass works in), ...Cost[n].
+// botPolicyNetLoadFile(path, label): PolicyNetwork.Load - load a converted
+// checkpoint as tier global.botPolicyNetCount; returns its index, or -1 if
+// refused.
+// Departure: adds a self-test against the file's test vector and a timed
+// initial cost (global.botPolicyNetCost[n], us); simulation stamp not
+// checked.
+// Sets global.botPolicyNet{Label,Uuid,Repeat,Layers,Trained,In,Out,W,B,T,
+// Cost} for tier n.
 var f, s, why, n, i, L, layers, nin, nout, prevOut, w, b, t, grids, list, p, c, test, logits, last, err, e, v, count, t0, elapsed, heads;
 
 n = global.botPolicyNetCount;
@@ -77,7 +61,7 @@ if (why == "")
             why = "layer " + string(L) + " takes " + string(nin) + " inputs where the previous layer gives " + string(prevOut);
             break;
         }
-        // ds_grid_read is a procedure: the dimensions it leaves are the check.
+        // ds_grid_read returns nothing; check dimensions
         if ((L mod 2) == 0)
         {
             if (ds_grid_width(w) != nout or ds_grid_height(w) != nin or ds_grid_width(b) != nout or ds_grid_height(b) != 1)
@@ -132,7 +116,7 @@ if (why == "")
         global.botPolicyNetTrained[n, c] = 0;
         global.botPolicyNetDrives[n, c] = 0;
     }
-    // "0,1,3,6": GM8 class numbers, which are PlayerClass ordinals.
+    // e.g. "0,1,3,6": PlayerClass ordinals = GM8 class numbers
     list = global.botPolicyNetLine[10] + ",";
     while (list != "")
     {
@@ -146,7 +130,7 @@ if (why == "")
             global.botPolicyNetTrained[n, c] = 1;
     }
 
-    // The self-test: the converter's logits for the converter's observation.
+    // self-test
     ds_grid_set_grid_region(global.botObsGrid, test, 0, 0, 0, BOT_OBS_LENGTH - 1, 0, 0);
     botPolicyNetAct(n);
     last = global.botPolicyNetT[n, layers - 1];
@@ -186,7 +170,7 @@ ds_grid_destroy(test);
 ds_grid_destroy(logits);
 ds_list_destroy(grids);
 
-// Price a decision: the forward pass, timed, plus the observation, assumed.
+// cost = timed forward pass + assumed observation cost
 count = 0;
 t0 = current_time;
 do

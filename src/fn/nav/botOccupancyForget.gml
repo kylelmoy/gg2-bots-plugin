@@ -1,4 +1,3 @@
-// botOccupancyForget(player): BotOccupancy.Forget - clear the "my route is
-// counted" bookkeeping (player.botPathOccupiedTeam back to TEAM_SPECTATOR),
-// nothing else.
+// botOccupancyForget(player): BotOccupancy.Forget - reset botPathOccupiedTeam
+// only.
 argument0.botPathOccupiedTeam = TEAM_SPECTATOR;

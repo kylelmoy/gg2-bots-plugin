@@ -1,7 +1,6 @@
-// botSpawnsTryGet(team, group, index): SpawnPoints.TryGet - resolves a
-// PLAYER_SPAWN's group and point index to a position. Returns whether it exists
-// (global.botRet); the position is global.botRetX / global.botRetY (0, 0 on a miss).
-// Anything that is not TEAM_RED reads blue, as SpawnPoints.Groups does.
+// botSpawnsTryGet(team, group, index): SpawnPoints.TryGet - whether the point
+// exists (global.botRet); position in global.botRetX/Y (0, 0 on a miss).
+// Non-red reads as blue.
 var tm, g, k, i, n, seen;
 tm = argument0;
 g = argument1;

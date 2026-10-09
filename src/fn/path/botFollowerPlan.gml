@@ -1,25 +1,9 @@
 // botFollowerPlan(player, x, y, team, hasIntel, setupGatesClosed,
 //                 canDoubleJump, canRocketJump, canStickyJump)
-// PathFollower.Plan (botPathPlan.gml): works out a fresh route from (x, y) and
-// installs it. Returns whether a route was found.
-//
-// The search runs BEFORE the old route is given up, and a failed search
-// KEEPS it - a bot whose new goal cannot be planned for keeps walking the last
-// route that worked.
-//
-// The timer is re-armed whatever happens below, and the stagger is ADDED, not
-// used as a phase (botPathPlan.gml:53): the interval is somewhere in [45, 89].
-// That interval is a hard ceiling on the takeoff budget - a successful re-plan
-// frees the route, EdgeFrom goes to -1, and FollowEdge's change-of-edge test
-// zeroes TakeoffTicks on the next tick - so at a stagger below 15
-// BOT_TAKEOFF_PATIENCE (60) can never be reached.
-//
-// The anti-thrash check lives here: two re-plans within BOT_THRASH_DIST of
-// each other is a bot going round in a circle at one spot, whatever the cause.
-//
-// This bot's OWN route comes out of the occupancy counts before it searches,
-// or it is charged extra for the path it is already walking and the whole team
-// churns lanes every re-plan.
+// PathFollower.Plan: searches from (x, y) and installs the route; a failed
+// search keeps the old one. Returns whether a route was found.
+// Re-plan interval is BOT_REPLAN_TICKS + stagger mod BOT_REPLAN_TICKS; it caps
+// TakeoffTicks, so a stagger below 15 never reaches BOT_TAKEOFF_PATIENCE.
 var p, px, py, qTeam, qIntel, qSetup, qDJ, qRJ, qSJ, thrash, start, goal, ok, occ, table;
 p = argument0;
 px = argument1;
@@ -37,11 +21,11 @@ p.botPathReplanAt = global.botTick + BOT_REPLAN_TICKS
 if (!p.botPathHasGoal)
     return false;
 
-// Only while a route is installed. A bot with nothing to follow has to keep
-// trying.
+// Fail backoff only while a route is installed.
 if (ds_list_size(p.botPathPath) > 0 and global.botTick < p.botPathPlanFailUntil)
     return false;
 
+// Anti-thrash: repeated re-plans at one spot blacklist the current edge.
 thrash = point_distance(px, py, p.botPathLastReplanX, p.botPathLastReplanY);
 
 if (thrash < BOT_THRASH_DIST)
@@ -58,10 +42,9 @@ if (p.botPathReplanNear >= 2)
     p.botPathReplanNear = 0;
 }
 
-// Swept here and nowhere else: a re-plan is the only moment a stale ban could
-// affect anything.
 botPathSweepBlacklist(p);
 
+// Own route off the counts so the search does not charge for it.
 botOccupancyRemove(p);
 
 start = navGraphNodeFromWorld(px, py);
@@ -80,9 +63,8 @@ if (goal < 0)
 
 p.botPathReplans += 1;
 
-// NavSearch.Find(start, goal, query, _scratch, Blacklist,
-// occupancy?.Counts(query.Team), Lane, Distances?.For(query)) - see
-// docs/path.md, "Assumptions about nav", for how each is passed.
+// NavSearch.Find(start, goal, query, _scratch, Blacklist, occupancy, Lane,
+// Distances)
 occ = -1;
 if (global.botOccupancyOn)
     occ = botOccupancyCounts(qTeam);
@@ -96,14 +78,10 @@ if (!ok)
     return false;
 }
 
-// Only NOW is the old route given up.
 botPathFreePath(p);
 ds_list_copy(p.botPathPath, p.botFollowerScratch);
 
-// Recorded with the route: the route is a list of NODES, and the edge each hop
-// costed can only be re-derived by asking the search's own question again.
-// Asking the LIVE one instead loops (a launcher going cold mid-arc abandons an
-// arc already paid for).
+// The plan's query; botFollowerTryFindEdge resolves hops against it.
 p.botPathPlanQueryTeam = qTeam;
 p.botPathPlanQueryHasIntel = qIntel;
 p.botPathPlanQuerySetupGatesClosed = qSetup;
@@ -114,6 +92,5 @@ p.botPathPathAt = 0;
 p.botPathPathStale = false;
 p.botPathPlanFailUntil = 0;
 
-// The one place a route is ever added, against the team asking.
 botOccupancyAdd(p, qTeam);
 return true;

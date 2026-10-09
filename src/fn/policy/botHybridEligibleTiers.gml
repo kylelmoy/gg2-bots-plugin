@@ -1,6 +1,5 @@
-// botHybridEligibleTiers(class): HybridBot.EligibleTiers - which tiers will
-// drive this class, as a bitmask (bit t for tier t), asked every tick because
-// a class can change mid-match. 0 when no tier drives it, or none is loaded.
+// botHybridEligibleTiers(class): HybridBot.EligibleTiers - bitmask (bit t =
+// tier t) of tiers that drive this class; 0 for none.
 var cls, bits, bit, t;
 cls = argument0;
 bits = 0;

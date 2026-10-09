@@ -1,7 +1,6 @@
-// botCombatLookForOne(player, char, range): BotCombat.LookForOne - looks for a
-// target on the shared cadence (BOT_TARGET_PERIOD, phased by
-// botCombatStagger), with a potshot roll at range * BOT_POTSHOT_MULT when the
-// ordinary radius is empty. Only the SEARCH widens.
+// botCombatLookForOne(player, char, range): BotCombat.LookForOne - target
+// search every BOT_TARGET_PERIOD (staggered); if none, a potshot roll at range
+// * BOT_POTSHOT_MULT.
 var p, me, range, found, tick, pot;
 p = argument0;
 me = argument1;

@@ -1,15 +1,12 @@
-// botJoinService(): finish the handshakes botJoinStart began.
-//
-// Run after GameServerEndStep, which is where JoiningPlayer instances are
-// serviced and a finished one becomes a Player - so a bot that joined this
-// frame is found this frame, and its rename goes out in the same broadcast as
-// its PLAYER_JOIN, after it. No client ever draws the tag.
+// botJoinService(): finish botJoinStart's handshakes. Runs after
+// GameServerEndStep turns joiners into Players, so the rename follows
+// PLAYER_JOIN in the same broadcast.
 var i, cs, tag, found, slot;
 for (i = 0; i < ds_list_size(global.botJoining); i += 1)
 {
     cs = ds_list_find_value(global.botJoining, i);
     tag = ds_list_find_value(global.botJoiningTag, i);
-    tcp_receive_available(cs); // whatever the server says to a joining client, unread
+    tcp_receive_available(cs); // drain, never read
 
     found = noone;
     with (Player)
@@ -18,7 +15,7 @@ for (i = 0; i < ds_list_size(global.botJoining); i += 1)
 
     if (found == noone)
     {
-        // A refused join (server full, wrong password) closes the connection.
+        // Refused joins error the socket; give up after 10 s too.
         if (!socket_has_error(cs) and current_time - ds_list_find_value(global.botJoiningSince, i) < 10000)
             continue;
         socket_destroy(cs);
@@ -37,14 +34,13 @@ for (i = 0; i < ds_list_size(global.botJoining); i += 1)
             botJoinedTick = global.botTick;
             botLastTeamAsk = global.botTick;
         }
-        // processClientCommands' PLAYER_CHANGENAME, minus the socket round trip,
-        // which would rate-limit a bot's class rename a second later.
+        // PLAYER_CHANGENAME written directly; via the socket it would
+        // rate-limit the class rename.
         write_ubyte(global.sendBuffer, PLAYER_CHANGENAME);
         write_ubyte(global.sendBuffer, slot);
         write_ubyte(global.sendBuffer, string_length(found.name));
         write_string(global.sendBuffer, found.name);
 
-        // Team and class are asked for the way a client asks.
         botSendByte(found, PLAYER_CHANGECLASS, found.botWantClass);
         botSendByte(found, PLAYER_CHANGETEAM, found.botWantTeam);
         botAttach(found);

@@ -1,9 +1,5 @@
-// botLanesCosts(lane): BotLanes.Costs - the column of global.botLanesCost for
-// this lane, to pass to navSearchFind's lane argument; -1 when no lanes are
-// derived (route on the graph's own costs - the C#'s null lanes).
-//
-// Wraps rather than refusing: the caller is a team position and the roster
-// is longer than the lane count by design (BotRoles.Lane).
+// botLanesCosts(lane): BotLanes.Costs - lane's column in global.botLanesCost
+// for navSearchFind; -1 when no lanes are derived (the C#'s null). Wraps lane.
 var c;
 c = global.botLanesCount;
 if (c < 1)

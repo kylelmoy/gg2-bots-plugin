@@ -1,9 +1,6 @@
-// botObsGoal(char): ObservationWriter.WriteGoal for the default AgentGoal,
-// rows 204..210 - the nearest enemy botObsEnemies found:
-//   204, 205  dy / d, dx / d (dy FIRST: the order every checkpoint reads)
-//   206       min(d / 400, 1)
-//   207..210  goal kind one-hot; the default kind 0
-// With no enemy the first three stay 0. Run after botObsEnemies.
+// botObsGoal(char): ObservationWriter.WriteGoal (default AgentGoal) - rows
+// 204..210 toward botObsEnemy0; run after botObsEnemies.
+// dy before dx: checkpoint order. No enemy: rows 204..206 stay 0.
 var ch, g, e, dx, dy, d;
 ch = argument0;
 g = global.botObsGrid;

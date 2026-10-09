@@ -1,12 +1,8 @@
-// botRolesAssign(class, earlier): BotRoles.Assign(PlayerClass, ReadOnlySpan<PlayerClass>).
-// `earlier` is a ds_list of the classes of this team's BOTS that come before
-// this one on the roster, in roster order (the caller leaves out other teams
-// and people). Returns BOT_ROLE_ATTACK or BOT_ROLE_DEFEND.
-//
-// Counts this bot's place in its lean group - the earlier bots whose
-// DefendEvery period equals its own - and hands that to botRolesAssignPlace.
-// A class that never defends (the medic) answers before counting, so it is in
-// no lean group at all and cannot take the place a group's defender needed.
+// botRolesAssign(class, earlier): BotRoles.Assign(PlayerClass,
+// ReadOnlySpan<PlayerClass>)
+// - BOT_ROLE_ATTACK or BOT_ROLE_DEFEND. `earlier`: ds_list of classes of this
+//   team's bots ahead of this one, in roster order. Counts earlier bots with
+//   the same DefendEvery.
 var cls, earlier, every, place, i, n, otherCls, otherEvery;
 cls = argument0;
 earlier = argument1;

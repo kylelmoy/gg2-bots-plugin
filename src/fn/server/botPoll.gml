@@ -1,5 +1,5 @@
-// botPoll(player): one bot's decision for the next tick, written onto its
-// character exactly as processClientCommands writes a client's INPUTSTATE.
+// botPoll(player): botThink, then write keys and aim onto the character as
+// INPUTSTATE does.
 var char, keys, dir, dist, net;
 char = argument0.object;
 if (char == -1)

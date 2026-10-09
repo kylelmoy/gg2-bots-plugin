@@ -1,22 +1,15 @@
-// botObsSelf(player, char): ObservationWriter.WriteSelf, rows 0..19.
-//   0..8   class one-hot (player.class: CLASS_* are PlayerClass ordinals)
-//   9      hp / ClassStats.MaxHp
+// botObsSelf(player, char): ObservationWriter.WriteSelf - rows 0..19.
+// Alarms (frames) scaled by global.delta_factor to 30 Hz ticks.
+//   0..8   class one-hot
+//   9      hp / MaxHp
 //   10, 11 hspeed / 15, vspeed / 15
-//   12     grounded: !place_free(x, y + 1) asked NOW, inside the game's own
-//          charSetSolids()/charUnsetSolids() bracket - what Begin Step's
-//          obstacleBelow asks, and what the C#'s Collision.PlaceFree on the
-//          character's box transcribes. Not `onground`, which is a Begin Step
-//          reading and can be a tick stale (the C#'s remark).
-//   13, 14 sin, cos of the aim: netAimDirection * 360 / 65536, which is
-//          CharacterState.AimDirection exactly (processClientCommands and
-//          botPoll both write aimDirection from it)
-//   15     ammoCount / MaxAmmo, when the class's weapon has a magazine
-//   16     reload: the weapon's alarm[5] / ReloadTime while it runs
+//   12     grounded, probed now (onground is a tick stale)
+//   13, 14 sin, cos of netAimDirection
+//   15     ammoCount / MaxAmmo
+//   16     reload alarm[5] / ReloadTime
 //   17     readyToShoot
-//   18     refire: the weapon's alarm[0] / RefireTime while it runs
-//   19     engineer: nutsNBolts / 100; nobody else's special is observed
-// Alarms count frames, which at 60 fps are half-ticks: they are scaled by
-// global.delta_factor into the 30 Hz ticks the C#'s timers count.
+//   18     refire alarm[0] / RefireTime
+//   19     engineer nutsNBolts / 100
 var pl, ch, g, cls, wpn, ok, grounded, aim, t;
 pl = argument0;
 ch = argument1;

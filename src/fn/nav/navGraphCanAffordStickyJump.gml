@@ -1,4 +1,3 @@
-// navGraphCanAffordStickyJump(hp): NavQuery.CanAffordStickyJump - whether a
-// character of this hp may be routed over a sticky jump (strictly greater than
-// NAV_SJ_DAMAGE, as for rocket jumps).
+// navGraphCanAffordStickyJump(hp): NavQuery.CanAffordStickyJump - hp >
+// NAV_SJ_DAMAGE.
 return (argument0 > NAV_SJ_DAMAGE);

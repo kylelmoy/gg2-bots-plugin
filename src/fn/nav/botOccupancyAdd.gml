@@ -1,12 +1,6 @@
-// botOccupancyAdd(player, team): BotOccupancy.Add - add this bot's installed
-// route (player.botPathPath) to team's counts, and record the team it was
-// counted under in player.botPathOccupiedTeam.
-//
-// Idempotent, and that is not tidiness: a route is added in one place but
-// removed in three, and a count that goes negative makes an edge cheaper the
-// more bots are on it. A route of fewer than two nodes counts nothing and
-// clears the flag: a flag left set against no route makes the next add a
-// no-op and the bot invisible to its team-mates for ever.
+// botOccupancyAdd(player, team): BotOccupancy.Add - add player.botPathPath to
+// team's counts; record the team in player.botPathOccupiedTeam. Idempotent.
+// A route under two nodes counts nothing and clears the flag.
 var p, team, map, occupied;
 p = argument0;
 team = argument1;

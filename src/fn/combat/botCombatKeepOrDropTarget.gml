@@ -1,10 +1,6 @@
-// botCombatKeepOrDropTarget(player, char, range): BotCombat.KeepOrDropTarget.
-// Keeps the current target if it is still worth shooting at, or drops it.
-// A potshot target is kept inside the same widened band that let it be
-// picked. The distance is to the same point the search measured (box centre
-// for a map object). The line-of-sight test is on the PERCEIVE cadence, and a
-// broken sightline drops the target only after BOT_TARGET_PERIOD * 2 ticks
-// unseen - the memory that lets a bot hold its aim on a doorway.
+// botCombatKeepOrDropTarget(player, char, range): BotCombat.KeepOrDropTarget -
+// keeps or drops the target. A potshot keeps the widened band. Sight checked on
+// the perceive cadence; unseen for BOT_TARGET_PERIOD * 2 ticks drops it.
 var p, me, range, keepRange, ok, tx, ty, tick;
 p = argument0;
 me = argument1;

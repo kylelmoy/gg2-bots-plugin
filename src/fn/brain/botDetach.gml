@@ -1,5 +1,4 @@
-// botDetach(player): the bot's Player is being destroyed. Its edges stop being
-// crowded, and everything every module allocated for it is freed.
+// botDetach(player): Player destroyed; free its occupancy and all module state.
 var p;
 p = argument0;
 botOccupancyRemove(p);

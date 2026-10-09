@@ -1,18 +1,11 @@
-// botObsProjectiles(char): ObservationWriter.WriteProjectiles, rows 56..115,
-// four blocks of 15 for the four nearest live projectiles within 400 px of
-// the character's origin (WorldView.ProjectilesWithin: nearest first, picked
-// rather than truncated, squared distance <= 400^2).
+// botObsProjectiles(char): ObservationWriter.WriteProjectiles - rows
+// 56..115, four 15-row blocks for the nearest projectiles within 400 px.
+// A kind whose nearest instance is out of range is skipped.
 //   +0      present
 //   +1, +2  (projectile - self) position / 400
-//   +3, +4  hspeed / 15, vspeed / 15 (absolute, not relative)
-//   +5..13  ProjectileKind - 1 one-hot (global.botObsProjObj)
-//   +14     1 when its team is not this character's team
-//
-// Cost: a kind with no instance costs one instance_number, and a kind whose
-// NEAREST instance (instance_nearest, native) is out of range costs one more
-// and is skipped whole, since then all of it is. Only a kind with something in
-// range is walked, so the interpreted loop runs over the flames of a pyro
-// standing beside you, not over every shot on the map.
+//   +3, +4  hspeed / 15, vspeed / 15 (absolute)
+//   +5..13  ProjectileKind - 1 one-hot
+//   +14     enemy team
 var ch, g, cx, cy, lim, found, k, obj, near, d, at, s, i, p;
 ch = argument0;
 g = global.botObsGrid;
@@ -33,9 +26,8 @@ for (k = 0; k < BOT_OBS_PROJ_KINDS; k += 1)
         d = sqr(x - cx) + sqr(y - cy);
         if (d <= lim)
         {
-            // Insertion into the sorted prefix; strictly < keeps the earlier
-            // one in front. No `and` in the loop test: GM8 evaluates both
-            // sides, and botObsProjD[at - 1] at at == 0 is out of range.
+            // sorted insert; strict < keeps ties stable.
+            // No `and`: GM8 doesn't short-circuit.
             at = min(found, BOT_OBS_PROJECTILES);
             while (at > 0)
             {

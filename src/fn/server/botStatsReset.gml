@@ -1,5 +1,4 @@
-// botStatsReset(): zero the cost counters the GameServer End Step hook keeps
-// (global.botCostSum / botCostTicks in ms and frames, global.botCostMax).
+// botStatsReset(): zero the End Step hook's cost counters (ms).
 global.botCostSum = 0;
 global.botCostTicks = 0;
 global.botCostMax = 0;

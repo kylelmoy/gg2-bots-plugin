@@ -1,14 +1,7 @@
 // botHandoverShouldEngage(player, char, range, wantsToEngage, humansOnly,
-// healTarget): Handover.ShouldEngage under HandoverRule.MacroTask, the only
-// rule a live server runs - an enemy within `range` AND the scripted layer's
-// own engage hold. The range half is not optional: the hold reaches out to
-// the class's targeting range (800 px for a soldier), far past where the
-// policy's observation saturates.
-//
-// A medic on the beam is never handed over (BotClassProfile.Heals, and the
-// ally the combat module holds, botCombatAlly, still valid by
-// botAllyStillValid): it has a job this tick that no trained policy knows.
-// Only the range half is filtered by humansOnly.
+// healTarget): Handover.ShouldEngage (HandoverRule.MacroTask) - an enemy
+// within `range` and the scripted layer wants to engage. Never for a medic
+// with a valid heal target. humansOnly filters the range test only.
 var pl, ch, range, wants, hum, heal, valid, d, inRange;
 pl = argument0;
 ch = argument1;

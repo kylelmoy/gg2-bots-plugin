@@ -1,7 +1,6 @@
-// botAimFallPredict(y, vy, t, floorY): BotAim.FallPredict - botFallPredict.gml.
-// Where a falling target will be in t ticks: accelerating at
-// NAV_JUMP_GRAVITY until NAV_JUMP_TERM_VY, then constant, and clamped at the
-// floor under it. botAimLead inlines this same formula in its loop.
+// botAimFallPredict(y, vy, t, floorY): BotAim.FallPredict - target y after t
+// ticks: NAV_JUMP_GRAVITY up to NAV_JUMP_TERM_VY, clamped at floorY. Inlined in
+// botAimLead.
 var ty, vy, t, clampTicks, predicted;
 ty = argument0;
 vy = argument1;

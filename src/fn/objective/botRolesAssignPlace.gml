@@ -1,10 +1,7 @@
-// botRolesAssignPlace(class, placeInGroup): BotRoles.Assign(PlayerClass, int)
-// - the overload that takes the bot's position among its team's bots that share
-// its BotClassProfile.DefendEvery period. Returns BOT_ROLE_ATTACK/BOT_ROLE_DEFEND.
-//
-// The medic veto (DefendEvery <= BOT_DEFEND_NEVER) is tested before the mod,
-// which is also what keeps a zero period from dividing by zero. `(place + 1)`
-// makes the first bot of a group an attacker every time.
+// botRolesAssignPlace(class, placeInGroup): BotRoles.Assign(PlayerClass, int) -
+// BOT_ROLE_ATTACK/BOT_ROLE_DEFEND. placeInGroup: index among team bots sharing
+// its DefendEvery. Veto tested before mod (no divide by zero); first of a group
+// always attacks.
 var cls, place, every;
 cls = argument0;
 place = argument1;

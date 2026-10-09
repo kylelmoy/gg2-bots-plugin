@@ -1,22 +1,9 @@
-// botObjectiveTryResolve(player, found, goalX, goalY, isSpot, mustTouch, offset):
-// BotObjective.TryResolve - resolves a decided goal (botObjectiveDecide's BotGoal,
-// field by field) to a nav node's own stand position. Returns whether it resolved
-// (global.botRet); the point is global.botRetX / global.botRetY.
-// `player` is unused (the C# method is on the per-bot BotObjective, whose only
-// state here is the graph, which is global); isSpot and mustTouch are unused by
-// the C# too, and passed so a caller can hand the goal over whole.
-//
-// Every objective is an OBJECT position, and map objects are not anchored the
-// way a character is, so: snap the objective to a node (searching downward),
-// then re-derive the goal from that node's own stand position, which the
-// follower then resolves back to the same node.
-//
-// The objective's own node is resolved FIRST and the offset only earns its way
-// in: snapping an already-offset position can step off the objective's
-// platform and land several storeys down. An offset snap is accepted only within
-// a body's height (BOX_H cells) of the objective's own node - "the same level",
-// so a spread can still cross a step. The column is then whichever of the
-// node's columns is nearest the goal's x.
+// botObjectiveTryResolve(player, found, goalX, goalY, isSpot, mustTouch,
+// offset): BotObjective.TryResolve - snaps a botObjectiveDecide goal to a nav
+// node's stand position. Returns whether it resolved (global.botRet); point in
+// global.botRetX/Y. player, isSpot, mustTouch unused. The offset snap is kept
+// only within NAV_BOX_H cells of the objective's own node; column clamped to
+// the node, nearest goal x.
 var goalFound, goalX, goalY, spreadX, baseX, node, off, standNode, standOff, x0, x1, col, ok;
 goalFound = argument1;
 goalX = argument2;

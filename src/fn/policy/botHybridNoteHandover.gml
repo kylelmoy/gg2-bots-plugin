@@ -1,7 +1,7 @@
-// botHybridNoteHandover(player, next): HybridBot.NoteHandover - remember the
-// bubble a handover to `next` (a tier, or -1 for the scripted layer) asks for,
-// for botHybridPollCommands to send. Overwritten, not queued: the last one
-// describes the state the bot is actually in. Only when global.botHandoverBubbles.
+// botHybridNoteHandover(player, next): HybridBot.NoteHandover - note the
+// bubble for a handover to `next` (tier, or -1 scripted) for
+// botHybridPollCommands. Overwrites, not queued. Only when
+// global.botHandoverBubbles.
 var pl, image;
 pl = argument0;
 if (!global.botHandoverBubbles)

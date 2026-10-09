@@ -1,15 +1,6 @@
-// botJoinStart(team, class, name): connect one bot to this server as a client.
-//
-// A bot is a real client of its own server, on a loopback connection - the
-// same thing the game does for the host's own player (GameServerCreate). So it
-// joins through the ordinary handshake (serviceJoiningPlayer), owns a real
-// socket that every guard in the game already understands, and every command
-// it gives later (team, class, zoom, build, eat, drop) is a real client
-// command handled by processClientCommands. Nothing in the game is patched.
-//
-// The whole handshake is written at once: the server reads it a field at a
-// time as its state machine gets to each one. The bot joins under a unique
-// tag so botJoinService can find the Player it becomes, and is renamed then.
+// botJoinStart(team, class, name): connect a bot as a loopback client of this
+// server. Sends the whole handshake at once under a unique tag; botJoinService
+// finds and renames it.
 var cs, tag, i;
 cs = tcp_connect("127.0.0.1", global.hostingPort);
 if (socket_has_error(cs))

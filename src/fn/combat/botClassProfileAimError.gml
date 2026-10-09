@@ -1,5 +1,5 @@
-// botClassProfileAimError(class): BotClassProfile.AimError - how much of the
-// difficulty's aim error this class carries (a multiplier on the knob).
+// botClassProfileAimError(class): BotClassProfile.AimError - multiplier on the
+// difficulty's aim error.
 switch (argument0)
 {
     case CLASS_SOLDIER: return BOT_CP_AIM_ERR_TIGHT;

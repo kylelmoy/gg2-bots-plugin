@@ -1,22 +1,7 @@
-// botPathInit(player) - BotPathState's constructor: every field, as
-// botPath<Field> on the bot's Player. Called once when the bot joins.
-//
-// Path is a ds_list of node indices. Blacklist is a ds_map whose KEYS are
-// the banned edges (navGraphEdgeKey) and whose values are their expiry ticks;
-// BlacklistOrder is a ds_queue of the same keys in the order they were
-// imposed, so a sweep off the front is the whole expiry mechanism (every ban
-// is the same length, so insertion order is expiry order).
-//
-// OccupiedTeam is TEAM_SPECTATOR for "counted nowhere"; botOccupancy* (nav)
-// owns it and nothing else writes it. PlanQuery (the traveller the route was
-// planned for) is flattened to botPathPlanQuery<Field>, defaulting to
-// default(NavQuery): team 0 (TEAM_RED) and every flag false.
-//
-// ReplanStagger is the bot's own offset into the re-plan cadence; the
-// reference uses the Player's instance id (botPathPlan.gml:53, `player mod
-// BOT_REPLAN_TICKS`), which is what this sets. It is taken modulo
-// BOT_REPLAN_TICKS at use. NB: at a stagger below 15 BOT_TAKEOFF_PATIENCE is
-// unreachable (see botFollowerPlan); the integrator may overwrite it.
+// botPathInit(player) - BotPathState's constructor, as botPath<Field> on the
+// Player. Path: ds_list of nodes. Blacklist: ds_map edgeKey -> expiry tick;
+// BlacklistOrder: ds_queue of keys in ban order. OccupiedTeam TEAM_SPECTATOR
+// = uncounted (written only by botOccupancy*). ReplanStagger: the Player id.
 var p;
 p = argument0;
 
@@ -65,7 +50,7 @@ p.botPathOffRouteFires = 0;
 p.botPathBlacklistFires = 0;
 p.botPathRocketJumps = 0;
 
-// the launch hand-off (botFollowerApplyLaunch reads these)
+// read by botFollowerApplyLaunch
 p.botPathRocketAim = BOT_FOLLOWER_ROCKET_AIM_DEGREES;
 p.botPathRocketFire = false;
 p.botPathMineFire = false;
@@ -84,6 +69,7 @@ p.botPathGateBackwards = 0;
 p.botPathGateShort = 0;
 p.botPathEdgeUnroutableFires = 0;
 
+// default(NavQuery)
 p.botPathPlanQueryTeam = TEAM_RED;
 p.botPathPlanQueryHasIntel = false;
 p.botPathPlanQuerySetupGatesClosed = false;

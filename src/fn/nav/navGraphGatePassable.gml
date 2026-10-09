@@ -1,12 +1,6 @@
 // navGraphGatePassable(gate, team, hasIntel, setupGatesClosed):
-// NavGraph.GatePassable (navGatePassable.gml) - whether this traveller may pass
-// a gate code (NAV_GATE_*).
-//
-// Mirrors charSetSolids, the only place the engine decides it:
-//   TeamGate   solid = (team != other.team or other.intel)
-//   IntelGate  solid = (team != other.team and other.intel)
-// So your own team gate is open unless you carry intel out of it, and an enemy
-// intel gate is closed only to a carrier. An unknown code refuses passage.
+// NavGraph.GatePassable - whether this traveller may pass gate code NAV_GATE_*.
+// Mirrors charSetSolids. Unknown code: false.
 var gate, team, hasIntel;
 gate = argument0;
 team = argument1;

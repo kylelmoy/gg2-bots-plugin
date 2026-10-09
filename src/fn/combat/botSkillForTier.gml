@@ -1,6 +1,5 @@
-// botSkillForTier(player, tier): BotSkill.ForTier - the server's 1-5
-// difficulty as a skill (BotSkill.TierSkills: 0.15, 0.30, 0.42, 0.67, 0.95),
-// written onto the Player by botSkillFor. The tier is clamped.
+// botSkillForTier(player, tier): BotSkill.ForTier - tier (clamped, 1-5) to a
+// skill via BotSkill.TierSkills, applied by botSkillFor.
 var t, s;
 t = max(BOT_TIER_MIN, min(BOT_TIER_MAX, floor(argument1)));
 switch (t - BOT_TIER_MIN)

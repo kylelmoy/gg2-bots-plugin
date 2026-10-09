@@ -1,5 +1,5 @@
-// botClassProfileSpotMode(class): BotClassProfile.SpotMode - where this class
-// likes to stand, as BOT_SPOT_NONE/STANDOFF/CHOKE/FLANK.
+// botClassProfileSpotMode(class): BotClassProfile.SpotMode -
+// BOT_SPOT_NONE/STANDOFF/ CHOKE/FLANK.
 switch (argument0)
 {
     case CLASS_SNIPER:

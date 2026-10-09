@@ -1,8 +1,6 @@
-// botServerStart(): a GameServer has just started. Called by bots.gml,
-// as the GameServer instance, on its first End Step.
-//
-// GameServerCreate destroys itself and exits when it cannot listen or cannot
-// connect to itself; the rest of the Create event still runs, so check.
+// botServerStart(): run as the GameServer on its first End Step (bots.gml).
+// GameServerCreate may fail to listen or self-connect and still finish, so
+// check.
 if (global.tcpListener < 0)
     exit;
 if (socket_has_error(global.tcpListener))
@@ -12,16 +10,16 @@ botConfigLoad();
 
 global.botTick = 0;
 global.botNextJoinTag = 1;
-global.botJoining = ds_list_create();      // client sockets mid-handshake
-global.botJoiningTag = ds_list_create();   // the unique name each is joining under
-global.botJoiningName = ds_list_create();  // the name it gets once joined
+global.botJoining = ds_list_create();      // sockets mid-handshake
+global.botJoiningTag = ds_list_create();   // unique join name
+global.botJoiningName = ds_list_create();  // final name
 global.botJoiningTeam = ds_list_create();
 global.botJoiningClass = ds_list_create();
-global.botJoiningSince = ds_list_create(); // current_time it started
+global.botJoiningSince = ds_list_create(); // current_time at start
 global.botMapKey = "";
 
-// Every Player that exists before the plugin started (the host's own) is a
-// human. Players created later get the flag from the Player Create hook.
+// Existing Players (the host) are human; the Player Create hook flags later
+// ones.
 with (Player)
     if (!variable_local_exists("botIsBot"))
         botIsBot = false;

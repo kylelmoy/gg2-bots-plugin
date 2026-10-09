@@ -1,7 +1,6 @@
-// botScriptedUnderFireWithNoAnswer(player, char): ScriptedBot.UnderFireWithNoAnswer -
-// being shot with nothing to shoot back at (no target, or one beyond this
-// class's range), which shortens the parked timer from eight seconds to half
-// a second.
+// botScriptedUnderFireWithNoAnswer(player, char):
+// ScriptedBot.UnderFireWithNoAnswer - hit with no target, or one beyond class
+// range. Shortens the parked timer.
 var p, char, hit;
 p = argument0;
 char = argument1;

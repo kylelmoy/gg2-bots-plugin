@@ -1,10 +1,5 @@
-// navGraphFree(): drop the installed graph, if any, and everything indexed by
-// it - the two derived indices and the search scratch. global.botNavReady is
-// false afterwards. Safe to call with nothing loaded.
-//
-// Not a C# member: the C# graph is garbage-collected when the population
-// manager lets go of it. The distance tables are navDistFree's, because they
-// can outlive one load of the same graph (see botNavMapCheck).
+// navGraphFree(): drop the graph, its indices and search scratch; botNavReady
+// false. Not in the C#. Distance tables are navDistFree's.
 global.botNavReady = false;
 if (global.botNavNodes >= 0)
     ds_grid_destroy(global.botNavNodes);

@@ -1,3 +1,3 @@
-// botClassProfileHeals(class): BotClassProfile.Heals - does this class heal
-// rather than shoot when a team-mate is near.
+// botClassProfileHeals(class): BotClassProfile.Heals - heals rather than shoots
+// near a team-mate.
 return (argument0 == CLASS_MEDIC);

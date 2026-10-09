@@ -1,5 +1,5 @@
-// botCountTeams(): players on red (global.botRet) and blue (global.botRetBlue),
-// bots and people alike, as GameServer.CountTeams.
+// botCountTeams(): GameServer.CountTeams - red in global.botRet, blue in
+// global.botRetBlue.
 var red, blue;
 red = 0;
 blue = 0;

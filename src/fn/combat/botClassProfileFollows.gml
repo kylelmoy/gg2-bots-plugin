@@ -1,3 +1,3 @@
-// botClassProfileFollows(class): BotClassProfile.Follows - does this class
-// follow a team-mate rather than the objective.
+// botClassProfileFollows(class): BotClassProfile.Follows - follows a team-mate,
+// not the objective.
 return (argument0 == CLASS_MEDIC);

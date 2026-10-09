@@ -1,27 +1,10 @@
 // botObjectiveControlPoint(char, team, defending): BotObjective.ControlPoint -
-// every control-point-family mode (CP, A/D, KotH, Dual KotH, Arena). Returns
-// `found` (global.botRet) and the C#'s ref outputs: global.botRetX /
-// global.botRetY (the chosen point's zone centre), global.botRetHeld and
-// global.botRetContested.
-//
-// Everyone heads for the nearest unlocked point it WANTS: a defender, one its
-// team owns; an attacker, one its team does not own, or one of ours with an
-// enemy on it. Preference is a separate accumulator, not a distance penalty (no
-// penalty out-weighs every map's widest gap). Failing that the nearest unlocked
-// point, and failing that the nearest at all, so a bot is already walking out
-// during the 900/1,800-tick pregame lock. Distances are measured to the zone
-// centre, as the C# measures them; a point with no zone is skipped.
-//
-// Game state: ControlPoint.team (-1 = nobody; C# Owned/Team), .locked, and the
-// fields botObjectiveContested reads. Points are visited in instance order, the
-// C#'s index order being ControlPoints.Place's; ties keep the first (strict `<`).
-//
-// DUAL KOTH is the one place the mode itself is read: it is won by holding the
-// ENEMY's hill, which no entity signature distinguishes from a two-point CP map.
-// The mode is DKothHUD, which basicRoomSetup creates for exactly that layout
-// (the C#'s GameMode == DualKingOfTheHill). An attacker goes to the enemy's hill
-// unless that hill is locked while some point is open (the cross-lock: the
-// enemy holds both, so our own hill is the only one in play).
+// every control-point mode. Returns found (global.botRet); zone centre in
+// global.botRetX/Y, plus global.botRetHeld and global.botRetContested. Nearest
+// unlocked wanted point (defender: ours; attacker: not ours or contested), else
+// nearest unlocked, else nearest. Zoneless points skipped; ties keep the first.
+// Dual KotH (DKothHUD): attacker takes the enemy hill unless it is locked while
+// another is open.
 var char, tm, defending, best, target, bestOpen, openPt, bestAny, anyPt;
 var i, cnt, point, hasZone, zx, zy, d, ours, wanted, isContested, enemyHill, wx, wy, held, contested;
 char = argument0;

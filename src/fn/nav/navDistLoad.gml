@@ -1,21 +1,8 @@
-// navDistLoad(path): NavDistanceSet.LoadOrDerive's load arm, over the plugin's
-// own <key>.dist (docs/NAVFILES.md) - read the tables for the INSTALLED graph.
-// Returns true when they are usable; false, with global.navDistReady false and
-// nothing held, otherwise.
-//
-// Never derived: the C# derives a missing or stale file in ~0.4 s, GML would
-// take minutes. A file that does not match the graph (node or edge count, a
-// missing profile table, a short file) is ignored, and searches fall back to
-// the straight-line heuristic - the C#'s no-distances arm.
-//
-// The whole file goes into one Faucet buffer (native, fast), and Between and
-// NextHop read it in place with buffer_set_readpos + read_uint/read_ushort,
-// little-endian (the game's global setting). Tables are laid out [goal][from].
-//
-// Sets global.navDistBuffer, global.navDistNodes, global.navDistPresent,
-// global.navDistTableCount, global.navDistCostAt[t] / global.navDistNextAt[t]
-// (byte offsets of table t's cost and next-hop halves) and
-// global.navDistByProfile[k] (the table for raw profile k, 0..7).
+// navDistLoad(path): NavDistanceSet.LoadOrDerive's load arm - read <key>.dist
+// for the installed graph into one buffer. False (nothing held) on mismatch.
+// Departure: never derives a missing/stale file.
+// Sets navDistBuffer/Nodes/Present/TableCount, navDistCostAt[t]/NextAt[t]
+// (byte offsets), navDistByProfile[k] (k 0..7). Tables are [goal][from], LE.
 var path, buf, n, edgeCount, present, count, t, at, key, k, masked, ok, cells, magic;
 path = argument0;
 navDistFree();
@@ -24,7 +11,7 @@ if (!global.botNavReady)
 if (!file_exists(path))
     return false;
 n = global.botNavNodeCount;
-// NextHop is a ushort with one value kept as the sentinel.
+// NextHop is a ushort; NAV_DIST_NO_HOP is the sentinel.
 if (n >= NAV_DIST_NO_HOP)
     return false;
 
@@ -68,10 +55,8 @@ for (t = 0; t < count; t += 1)
     at += 4 + 6 * cells;
 }
 
-// NavDistanceSet.FromTables: expand the distinct tables over all eight raw
-// profile keys, masking with the `present` the writer recorded - which is
-// what makes a sticky-jumper read the walker's table on a graph with no
-// sticky arcs. A profile with no table refuses the file.
+// NavDistanceSet.FromTables: map each profile (masked by `present`) to a table;
+// a profile with no table refuses the file.
 for (k = 0; k < NAV_DIST_PROFILES; k += 1)
 {
     masked = k & present;

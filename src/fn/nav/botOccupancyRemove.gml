@@ -1,9 +1,6 @@
-// botOccupancyRemove(player): BotOccupancy.Remove - take this bot's route back
-// out of the counts, against player.botPathOccupiedTeam - the team it was
-// counted under - and never the bot's team now: autobalance and a rotation
-// re-team bots, and reading the current team would leave the old team's
-// counts raised for ever. Call it BEFORE the route (player.botPathPath) is
-// cleared; the counts can only be found through it.
+// botOccupancyRemove(player): BotOccupancy.Remove - remove the route from the
+// counts of player.botPathOccupiedTeam (not the current team). Call before
+// botPathPath is cleared.
 var p, occupied, map;
 p = argument0;
 occupied = p.botPathOccupiedTeam;

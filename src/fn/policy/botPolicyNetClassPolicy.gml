@@ -1,12 +1,7 @@
-// botPolicyNetClassPolicy(text): parse [Bots] ClassPolicy ("Class=name,...",
-// name a checkpoint's file name without its extension, or "scripted") into
-// global.botPolicyNetAssigned[class]: "" when the class is not named, else
-// the lower-cased target. BotBrain.ParseClassPolicies.
-//
-// gg2-server refuses to start on a malformed entry, an unknown class or a
-// class named twice; here that entry is skipped and reported
-// (global.botPolicyNetReport), and the first assignment of a class stands.
-// Also sets global.botPolicyClassName[class] for reports.
+// botPolicyNetClassPolicy(text): BotBrain.ParseClassPolicies -
+// "Class=name,..." into global.botPolicyNetAssigned[class] (lower-cased;
+// "" if unnamed). Also sets global.botPolicyClassName.
+// Departure: a bad or duplicate entry is skipped and reported, not fatal.
 var s, p, q, entry, cname, target, c, k;
 
 global.botPolicyClassName[CLASS_SCOUT] = "Scout";
@@ -38,7 +33,7 @@ while (s != "")
     }
     cname = string_copy(entry, 1, q - 1);
     target = string_delete(entry, 1, q);
-    // A class a bot can be: Scout through Pyro, never the Quote.
+    // excludes Quote
     c = -1;
     for (k = 0; k < CLASS_QUOTE; k += 1)
         if (cname == string_lower(global.botPolicyClassName[k]))

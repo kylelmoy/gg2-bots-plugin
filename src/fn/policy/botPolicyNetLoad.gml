@@ -1,36 +1,19 @@
-// botPolicyNetLoad(): load every policy checkpoint at server start.
-//
-// gg2-server's BotBrain.Build for BotMode.Policy, reduced to what a GML
-// server has: every build/data/policy file shipped in global.botDir +
-// "policy\" (made by tools/convert-policy.js from the .npz checkpoints) is
-// one tier, in file-name order, and drives the classes its own file claims
-// (PolicyNetwork.TrainedClasses), adjusted by [Bots] ClassPolicy exactly as
-// BotBrain.Build resolves it: an explicit Class=name wins, Class=scripted
-// takes the class away from every tier, and the file's set fills in every
-// class nobody named.
-//
-// [Bots] Mode (global.botMode, read by botConfigLoad) "scripted" disables the
-// policy entirely: nothing is loaded and every class stays scripted.
-//
-// [Bots] Arbiter is the per-tick decision budget in microseconds, as on
-// gg2-server; unset, BOT_ARBITER_DEFAULT_US (docs/departures/policy.md).
-//
-// Where gg2-server refuses to START over a bad checkpoint or a bad
-// ClassPolicy entry, this refuses the checkpoint or the entry and writes why
-// to global.botDir + "policy.log" (also kept in global.botPolicyNetReport): a
-// modal dialog on a dedicated server is worse than a scripted bot.
-//
-// Returns how many checkpoints loaded.
+// botPolicyNetLoad(): BotBrain.Build for BotMode.Policy - load each
+// policy\*.txt as a tier (file-name order); returns the count loaded.
+// Classes driven: TrainedClasses, overridden by [Bots] ClassPolicy.
+// Mode=scripted loads nothing. Arbiter: budget in us.
+// Departure: bad checkpoints/entries are skipped and logged to policy.log
+// (global.botPolicyNetReport), not fatal.
 var names, name, i, n, c, k, text, classPolicy, arbiter, f, known, owner;
 
-// A server started twice in one game must not leak the first one's grids.
+// frees a previous server's grids
 botPolicyNetFree();
 global.botPolicyNetCount = 0;
 global.botPolicyNetReport = "";
 global.botArbiterTick = -1;
 global.botArbiterSpent = 0;
 
-// ActionDecoder.HeadShape, as offsets into the 27 logits.
+// ActionDecoder.HeadShape
 global.botPolicyHeadWidth[0] = 3;
 global.botPolicyHeadWidth[1] = 2;
 global.botPolicyHeadWidth[2] = 2;
@@ -70,8 +53,6 @@ else
         name = file_find_next();
     }
     file_find_close();
-    // File-name order, so the tier order is the same on every machine. The
-    // shipped tiers drive disjoint classes, so order changes nothing there.
     ds_list_sort(names, true);
 
     for (i = 0; i < ds_list_size(names); i += 1)
@@ -88,7 +69,6 @@ else
 
     botPolicyNetClassPolicy(classPolicy);
 
-    // BotBrain.Build's resolution, per tier and class.
     for (n = 0; n < global.botPolicyNetCount; n += 1)
     {
         text = "";
@@ -115,8 +95,7 @@ else
         global.botPolicyNetReport += "policy " + global.botPolicyNetLabel[n] + ": drives " + text + chr(13) + chr(10);
     }
 
-    // A ClassPolicy target no loaded checkpoint answers to: gg2-server
-    // refuses to start; here the class stays scripted, said out loud.
+    // unknown target: class stays scripted
     for (c = 0; c < CLASS_QUOTE; c += 1)
     {
         if (global.botPolicyNetAssigned[c] == "" or global.botPolicyNetAssigned[c] == "scripted")
@@ -129,7 +108,6 @@ else
             global.botPolicyNetReport += "WARNING: ClassPolicy " + global.botPolicyClassName[c] + "=" + global.botPolicyNetAssigned[c] + ": no checkpoint is loaded under that name; " + global.botPolicyClassName[c] + " stays scripted" + chr(13) + chr(10);
     }
 
-    // Two tiers on one class: the earlier takes it whenever the budget allows.
     for (c = 0; c < CLASS_QUOTE; c += 1)
     {
         owner = -1;

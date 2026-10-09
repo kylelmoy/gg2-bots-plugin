@@ -1,6 +1,5 @@
-// botScriptedUpdateObjective(player, char): ScriptedBot.UpdateObjective - how a
-// spot goal ends, the objective cadence, the re-post when parked, and the
-// retarget throttle. See ScriptedBot.cs for the measurements behind each rule.
+// botScriptedUpdateObjective(player, char): ScriptedBot.UpdateObjective -
+// spot-goal ending, objective cadence, re-post when parked, retarget throttle.
 var p, char, decideNow, got, foe, underFire, reposting, allowSpot, found, x0, y0, resolved, gx, gy, isSpot;
 p = argument0;
 char = argument1;
@@ -10,7 +9,7 @@ if (!p.botScriptedHasObjective or p.botScriptedGoalLocked)
 
 decideNow = false;
 
-// --- how a spot goal ends: once per attempt for a re-post ---
+// Judge a re-post once per attempt.
 if (p.botScriptedGoalWasRepost and !p.botScriptedRepostJudged
     and (ds_list_size(p.botPathPath) == 0 or !p.botPathHasGoal or global.botTick >= p.botScriptedRepostUntil))
 {
@@ -19,12 +18,11 @@ if (p.botScriptedGoalWasRepost and !p.botScriptedRepostJudged
     if (got < BOT_GOAL_RETARGET_DIST)
     {
         botScriptedAdvanceRepost(p);
-        // Let go of it, or the retarget throttle keeps the failed goal for ever.
+        // Drop it, or the throttle keeps it forever.
         botOccupancyRemove(p);
         botPathFreePath(p);
         p.botPathHasGoal = false;
-        // A goal that never planned costs one A* to rule out: try the next
-        // candidate next tick rather than at the next objective tick.
+        // Never planned: try the next candidate next tick.
         decideNow = (ds_list_size(p.botPathPath) == 0);
     }
     else
@@ -35,22 +33,19 @@ if (p.botScriptedGoalWasRepost and !p.botScriptedRepostJudged
 }
 else if (p.botScriptedGoalIsSpot and p.botPathHasGoal and ds_list_size(p.botPathPath) == 0)
 {
-    // A class spot that never planned is banned for a while.
+    // Unplanned class spot: ban spots for a while.
     p.botScriptedSpotBanUntil = global.botTick + BOT_SCRIPTED_SPOT_BAN_TICKS;
 }
 
-// Staggered per bot so a server full of them does not pay every objective
-// scan on one frame.
 if (!decideNow and (global.botTick + p.botCombatStagger) mod BOT_OBJECTIVE_PERIOD != 0)
     exit;
 
-// A re-post goal is held, not re-decided, while its route lives.
+// Hold a re-post goal while its route lives.
 if (p.botScriptedGoalWasRepost and !p.botScriptedRepostJudged
     and p.botPathHasGoal and ds_list_size(p.botPathPath) > 0 and global.botTick < p.botScriptedRepostUntil)
     exit;
 
-// Only the medic reads the combat target: its follow position is on the far
-// side of its patient from the enemy.
+// Only the medic uses foe (stands opposite it from its patient).
 foe = noone;
 if (p.botCombatTargetExists and p.botCombatTargetKind == BOT_TARGET_KIND_CHARACTER)
     foe = p.botCombatTargetSlot;
@@ -75,7 +70,7 @@ if (!resolved)
 gx = global.botRetX;
 gy = global.botRetY;
 
-// The throttle is on the RESOLVED node position.
+// Throttle on the resolved node position.
 if (p.botPathHasGoal)
 {
     if (point_distance(gx, gy, p.botPathGoalX, p.botPathGoalY) <= BOT_GOAL_RETARGET_DIST)

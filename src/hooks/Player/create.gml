@@ -1,2 +1,2 @@
-// Every Player is a person until botJoinService says otherwise.
+// A person until botJoinService says otherwise.
 botIsBot = false;

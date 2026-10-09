@@ -1,14 +1,8 @@
-// botObjectiveGenerator(class, team, defending): BotObjective.Generator - the
-// generator branch. Returns `found` (global.botRet) and the C#'s ref outputs:
-// global.botRetX / global.botRetY (wx, wy), global.botRetAnchorX / AnchorY,
-// global.botRetSpotMin / SpotMax / SpotHigh and global.botRetUseSpot. Fields the
-// branch does not set come back as the caller's defaults (0, false).
-//
-// The objective is to DESTROY a generator - shot from range, never touched - so
-// an attacker's goal is a firing position (a spot anchored on it) and a
-// defender's is near its own. Exists = instance_exists(GeneratorRed/Blue) (the
-// instance is destroyed with the generator). Its middle is the instance's bbox
-// centre, the box GM8 itself reports (Generators.BodyBox).
+// botObjectiveGenerator(class, team, defending): BotObjective.Generator.
+// Returns found (global.botRet); global.botRetX/Y, botRetAnchorX/Y,
+// botRetSpotMin/SpotMax/SpotHigh, botRetUseSpot (unset fields 0/false).
+// Attacker: a firing spot anchored on the enemy generator's bbox centre;
+// defender: its own generator.
 var cls, tm, defending, want, gen, wx, wy, anchorX, anchorY, spotMin, spotMax, spotHigh, useSpot;
 var minBand, range;
 cls = argument0;

@@ -1,10 +1,6 @@
-// botOccupancyApply(map, player, delta): BotOccupancy.Apply - add delta to the
-// count of every edge of player.botPathPath (the bot's installed route, a
-// ds_list of nodes) in map.
-//
-// A count that falls to nothing is deleted rather than left at zero, so the
-// map stays the size of what is being walked. ds_map_replace does not insert
-// in GM8, hence the exists test before every write.
+// botOccupancyApply(map, player, delta): BotOccupancy.Apply - add delta to
+// map's count for every edge of player.botPathPath; counts <= 0 are deleted.
+// GM8 ds_map_replace does not insert, hence the exists test.
 var map, route, delta, i, size, key, was, had;
 map = argument0;
 route = argument1.botPathPath;

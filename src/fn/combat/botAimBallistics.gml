@@ -1,13 +1,7 @@
-// botAimBallistics(char): BotAim.Ballistics - botWeaponBallistics.gml.
-// The bot's MODEL of the weapon its class carries, not the weapon: tuned
-// numbers the aim solver flies. Returns
-//   global.botRet         Speed (0 = do not lead: the Rifle, the Medigun)
-//   global.botRetGravity  Gravity
-//   global.botRetDrift    Drift: the shooter's own hspeed, only for the three
-//                         weapons whose shots inherit it (Scattergun, Shotgun,
-//                         Minigun)
-// Keyed on the CLASS (char.player.class), as the C# is, not on the weapon
-// object as the reference was.
+// botAimBallistics(char): BotAim.Ballistics - the bot's model of its class's
+// weapon. Returns global.botRet speed (0 = no lead), global.botRetGravity,
+// global.botRetDrift (shooter's hspeed for Scattergun/Shotgun/Minigun, else 0).
+// Keyed on class.
 var c, cls, spd, grav;
 c = argument0;
 cls = c.player.class;

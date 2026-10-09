@@ -1,8 +1,5 @@
-// navDistNextHop(table, from, goal): NavDistances.NextHop - the node after
-// `from` on the cheapest route to `goal` on that table's graph, or -1
-// (NavDistances.None) if there is no route, `from` is the goal, or anything is
-// out of range. Following it reaches the goal in at most nodeCount hops: the
-// hops are the parent pointers of one shortest-path tree.
+// navDistNextHop(table, from, goal): NavDistances.NextHop - next node on the
+// cheapest route; -1 (None) if no route, from == goal, or out of range.
 var t, from, goal, n, hop;
 t = argument0;
 from = argument1;

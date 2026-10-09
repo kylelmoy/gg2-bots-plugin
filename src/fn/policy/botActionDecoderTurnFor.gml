@@ -1,6 +1,5 @@
 // botActionDecoderTurnFor(bin): ActionDecoder.TurnFor - degrees for an aim
-// bin. Bin 0 is a full left turn, 7 none, 14 a full right turn, each 30/7
-// degrees apart; an out-of-range bin is no turn.
+// bin (0 full left, 7 none, 14 full right; out of range: none).
 var b;
 b = argument0;
 if (b >= BOT_ACTION_AIM_BINS or b < 0)

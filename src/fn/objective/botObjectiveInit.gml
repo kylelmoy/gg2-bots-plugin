@@ -1,11 +1,7 @@
-// botObjectiveInit(player): the per-bot half of BotObjective - the spot it last
-// chose and the question it chose it for (C# _spotNode, _spotAnchorX/Y,
-// _spotMin/_spotMax/_spotHigh/_spotLos), on the bot's Player. Called once when
-// the bot joins. The graph and the spawn points are global (botSpawnsLoad).
-//
-// botObjectiveSpotGen is the map generation (global.botSpawnsGen) the held node
-// belongs to: botObjectiveDecide drops a node from another map's graph, which is
-// what building a fresh BotObjective per map does in the C#.
+// botObjectiveInit(player): per-bot BotObjective state on the Player (C#
+// _spotNode, _spotAnchorX/Y, _spotMin/_spotMax/_spotHigh/_spotLos). Called once
+// on join. botObjectiveSpotGen: map generation (global.botSpawnsGen) the held
+// node belongs to.
 var bot;
 bot = argument0;
 bot.botObjectiveSpotNode = -1;

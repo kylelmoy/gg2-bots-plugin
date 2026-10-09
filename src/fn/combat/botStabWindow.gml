@@ -1,12 +1,8 @@
-// botStabWindow(char, targetChar): BotStab.Window - botStabWindow.gml. Would a
-// spy pressing ATTACK now actually connect? The press freezes the spy and the
-// knife's hitbox exists from t+32 to t+38 (BOT_STAB_LEAD_MIN..MAX), so the
-// test is where the target WILL be then: constant hspeed, botAimFallPredict
-// clamped at the floor under it (botAimFloorUnder), its own bounds
-// (left/right/top/bottom_bound_offset) against StabMaskS's axis-aligned box:
-// BOT_STAB_REACH the way the spy faces, BOT_STAB_BACK behind, REACH up, BACK
-// down. Facing: aimDirection in [90, 270] inclusive is left.
-// Says nothing about cloak, readyToStab or team: those are the caller's.
+// botStabWindow(char, targetChar): BotStab.Window - would a stab now connect:
+// target's predicted bounds (constant hspeed, botAimFallPredict) at
+// t+BOT_STAB_LEAD_MIN..MAX vs StabMaskS's box (BOT_STAB_REACH forward/up,
+// BOT_STAB_BACK back/down). aimDirection in [90, 270] faces left. Ignores
+// cloak, readyToStab, team.
 var me, tg, facing, maskLeft, maskRight, maskTop, maskBottom, fl, vx, vy, t, px, py;
 me = argument0;
 tg = argument1;

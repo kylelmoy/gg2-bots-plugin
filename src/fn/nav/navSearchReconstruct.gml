@@ -1,13 +1,6 @@
-// navSearchReconstruct(start, end, route): NavSearch.Reconstruct - walk the
-// last search's cameFrom back from end, filling route (a ds_list, appended to)
-// start-first. Returns false - and clears route - when the chain does not
-// reach start: a partial route would have a bot walk confidently from
-// somewhere it is not standing. (Unreachable by construction; kept because
-// the guard is one comparison.)
-//
-// Front-inserts rather than walking and reversing as the C# does: GM8 has no
-// ds_list reverse, and a native insert beats an interpreted copy loop. The
-// order it leaves is the same.
+// navSearchReconstruct(start, end, route): NavSearch.Reconstruct - append the
+// last search's cameFrom chain to route, start first. False (route cleared)
+// if it doesn't reach start. Departure: front-inserts instead of reversing.
 var start, at, route, guard, n, base;
 start = argument0;
 at = argument1;

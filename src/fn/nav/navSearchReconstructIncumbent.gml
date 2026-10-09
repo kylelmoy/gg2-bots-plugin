@@ -1,12 +1,7 @@
 // navSearchReconstructIncumbent(start, node, goal, route):
-// NavSearch.ReconstructIncumbent - the incumbent route: the search's own route
-// from start to node, then the distance table's next-hop chain from node to
-// goal. Only valid inside navSearchFind (it reads that search's table).
-//
-// The chain priced finite when it became the incumbent, so every hop had a
-// routable, unblocked edge then, and nothing in a search changes that. A chain
-// that does not reach the goal is reported as no route at all, and route is
-// cleared.
+// NavSearch.ReconstructIncumbent - search route start..node, then the table's
+// next-hop chain node..goal. Only inside navSearchFind. False (route cleared)
+// if the chain doesn't reach goal.
 var start, node, goal, route, ok, at, guard, n, buf, nextRow, hop;
 start = argument0;
 node = argument1;

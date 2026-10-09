@@ -1,9 +1,7 @@
-// botCombatStillWorthShootingAt(player, char): BotCombat.StillWorthShootingAt.
-// Is the current target still alive, still an enemy, and still visible (the
-// same botVisibilityCanSee question the search asked, inlined). Returns
-// global.botRet (true/false) and the point to measure and aim at in
-// global.botRetX/Y: a character's origin, a sentry's / generator's box
-// centre. A sentry or generator has hp and a team and nothing else this reads.
+// botCombatStillWorthShootingAt(player, char): BotCombat.StillWorthShootingAt -
+// target still alive, enemy and visible (botVisibilityCanSee inlined)?
+// global.botRet true/false; global.botRetX/Y the aim point: character origin or
+// building box centre.
 var p, me, myTeam, kind, s, c, ok;
 p = argument0;
 me = argument1;

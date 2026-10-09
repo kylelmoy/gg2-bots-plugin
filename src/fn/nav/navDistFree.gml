@@ -1,5 +1,4 @@
-// navDistFree(): drop the distance tables, if any. Searches then use the
-// straight-line heuristic. Safe to call with nothing loaded.
+// navDistFree(): drop the distance tables, if any.
 var k;
 global.navDistReady = false;
 if (global.navDistBuffer >= 0)

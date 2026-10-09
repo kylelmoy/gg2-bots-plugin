@@ -1,5 +1,5 @@
-// botPolicyNetFree(): destroy every grid botPolicyNetLoad made (call when
-// the server stops; GM8 has no GC). Leaves no tier loaded.
+// botPolicyNetFree(): destroy every grid botPolicyNetLoad made; leaves no
+// tier loaded.
 var n, L;
 if (!variable_global_exists("botPolicyNetCount"))
     exit;

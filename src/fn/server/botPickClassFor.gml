@@ -1,8 +1,6 @@
-// botPickClassFor(player, team): a class for a bot joining or re-rolling on
-// `team`, or -1 when no class has room. BotPopulation.PickClass over the
-// [BotClasslimits] (bots of each class per team) intersected with the server's
-// own class limits (countClassmembersExcept, as checkClasslimits counts them).
-// `player` is the bot being re-rolled, left out of every count, or noone.
+// botPickClassFor(player, team): BotPopulation.PickClass - a random class with
+// room under both [BotClasslimits] and the server's class limits, or -1. player
+// (or noone) is excluded from counts.
 var c, n, possible, picked, guard;
 possible = false;
 for (c = 0; c <= CLASS_PYRO; c += 1)

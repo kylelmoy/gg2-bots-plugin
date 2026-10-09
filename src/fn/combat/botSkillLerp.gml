@@ -1,7 +1,5 @@
-// botSkillLerp(skill, v0, v1, v2, v3): BotSkill.Lerp - botSkillLerp.gml.
-// A four-anchor piecewise ramp, flat below 0.15 and above 0.95; the three
-// segments are 0.15-0.45, 0.45-0.75 and 0.75-0.95 (the last is narrower on
-// purpose, so the top tier moves further per point of skill).
+// botSkillLerp(skill, v0, v1, v2, v3): BotSkill.Lerp - piecewise ramp through
+// anchors at 0.15, 0.45, 0.75, 0.95; flat outside.
 var s;
 s = argument0;
 if (s <= 0.15)

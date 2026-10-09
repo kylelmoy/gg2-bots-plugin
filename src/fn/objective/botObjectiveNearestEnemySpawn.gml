@@ -1,13 +1,7 @@
-// botObjectiveNearestEnemySpawn(team, fromX, fromY): BotObjective.NearestEnemySpawn
-// (botEnemySpawn) - the enemy spawn point nearest a place. `team` is the ASKING
-// bot's. Returns whether there is one (global.botRet); the point is
-// global.botRetX / global.botRetY.
-//
-// Nearest-to-the-caller is "the direction the enemy is coming from": on a
-// multi-stage map the five groups are scattered across the level. Reads
-// botSpawnsLoad's table directly (one pass in SpawnPoints' group/index order,
-// strict `<` so the first of equals wins) rather than through
-// botSpawnsCount/botSpawnsTryGet, which would make it quadratic.
+// botObjectiveNearestEnemySpawn(team, fromX, fromY):
+// BotObjective.NearestEnemySpawn (botEnemySpawn) - the spawn point of `team`'s
+// enemy nearest (fromX, fromY). Returns whether one exists (global.botRet);
+// point in global.botRetX/Y. First of equals wins.
 var tm, fromX, fromY, enemy, best, bx, by, i, n, sx, sy, d;
 tm = argument0;
 fromX = argument1;

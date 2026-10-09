@@ -1,6 +1,5 @@
 // botHybridTakeWheel(player, tier, char): HybridBot.TakeWheel - `tier` takes
-// the wheel. The tier giving it up abandons its decision; the bubble is noted
-// before the driver changes; absolute aim is resynced on every handover in.
+// the wheel; the previous tier abandons its decision.
 var pl, tier, ch;
 pl = argument0;
 tier = argument1;

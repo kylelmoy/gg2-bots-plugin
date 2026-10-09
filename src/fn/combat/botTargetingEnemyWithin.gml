@@ -1,6 +1,5 @@
-// botTargetingEnemyWithin(player, range): BotTargeting.EnemyWithin -
-// botEnemyWithin.gml. Is any live enemy this bot can see (botVisibilityCanSee,
-// inlined) within this radius.
+// botTargetingEnemyWithin(player, range): BotTargeting.EnemyWithin - any live,
+// visible enemy within range (botVisibilityCanSee inlined).
 var p, me, myTeam, range, mx, my, mxs, found, vis;
 p = argument0;
 range = argument1;

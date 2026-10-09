@@ -1,31 +1,19 @@
 // botObjectiveDecide(player, role, spreadX, allowSpot, target, reposting,
-//     repostSkip, repostNearBot, useReachable, team, hasIntel, setupGatesClosed,
-//     canDoubleJump, canRocketJump, canStickyJump)
-// BotObjective.Decide (botObjectiveUpdate): where this bot should be heading,
-// given the game mode's objective. Returns the BotGoal:
+//     repostSkip, repostNearBot, useReachable, team, hasIntel,
+//     setupGatesClosed, canDoubleJump, canRocketJump, canStickyJump)
+// BotObjective.Decide (botObjectiveUpdate): where the bot should head. Returns
+// the BotGoal:
 //     global.botRet           Found
 //     global.botRetX, botRetY where to walk (world)
-//     global.botRetIsSpot     it came out of the spot search (botGoalSpotFind)
-//     global.botRetMustTouch  a goal to occupy rather than cover
-//     global.botRetOffset     how far X was moved sideways off the objective
-// Hand the five to botObjectiveTryResolve. All zero/false when nothing was found.
-//
-// Arguments, as the C#'s: role (BOT_ROLE_*), spreadX (botRolesSpreadX, constant
-// for the bot's life), allowSpot (false while the caller bans spots), target
-// (what the combat half is looking at: its Player instance - a Character is
-// accepted too - or noone), reposting / repostSkip / repostNearBot (the caller's
-// re-post state, ScriptedBot.ParkedTicks), and the C#'s `NavQuery?
-// reachableFor` as useReachable (false = null) plus NavQuery's six fields.
-//
-// The cascade mirrors basicRoomSetup's instance_exists cascade, but asks the
-// ENTITIES (a carried flag has no instance) and only reads the mode itself for
-// Dual KotH (botObjectiveControlPoint). Then, in order: role (a defender's anchor
-// is its own objective), held (a defender overlooks a point we hold, an attacker
-// pushes out toward the enemy spawn), class (a sniper perches, an engineer sits
-// on the choke, a spy flanks - never on a goal it must touch), re-post (a bot
-// parked doing nothing asks for somewhere else), spot, spread. The medic's
-// follow-goal and the flag-carrier chase are moving INSTANCES and return early,
-// skipping spot and spread. Runs on the objective cadence (BOT_OBJECTIVE_PERIOD).
+//     global.botRetIsSpot     from botGoalSpotFind
+//     global.botRetMustTouch  occupy rather than cover
+//     global.botRetOffset     sideways offset of X
+// All zero/false when not found. Pass them to botObjectiveTryResolve. target:
+// combat target's Player (or Character) or noone.
+// reposting/repostSkip/repostNearBot: caller's re-post state. useReachable
+// false = C# reachableFor null; last six = NavQuery fields. Order: medic
+// follow, mode objective, carrier chase, held push, class spot, re-post, spot,
+// spread.
 var bot, role, spreadX, allowSpot, target, reposting, repostSkip, repostNearBot, useReach, query;
 var char, myTeam, cls, defending, selfX, selfY, carrying, gen, targetChar;
 var follows, ally, mate, wantX, carrier;
@@ -78,7 +66,6 @@ selfX = char.x;
 selfY = char.y;
 carrying = char.intel;
 
-// A node held from another map's graph means nothing in this one.
 gen = 0;
 if (variable_global_exists("botSpawnsGen"))
     gen = global.botSpawnsGen;
@@ -88,8 +75,7 @@ if (bot.botObjectiveSpotGen != gen)
     bot.botObjectiveSpotGen = gen;
 }
 
-// The combat target's living Character, or -1 (C# `target is { } foe &&
-// world.IsAlive(foe)`).
+// Combat target's living Character, or -1.
 targetChar = -1;
 if (target != noone and target != -1)
 {
@@ -102,10 +88,8 @@ if (target != noone and target != -1)
     }
 }
 
-// --- the medic's follow-goal -----------------------------------------------
-// First, and returns early: following is the medic's job in every mode. An intel
-// carrier does not follow. skipFollowers TRUE here (two medics who pick each
-// other deadlock in spawn); the combat half asks with false.
+// Medic follow; returns early. Carriers don't follow. skipFollowers true
+// (mutual medics deadlock).
 follows = botClassProfileFollows(cls);
 if (follows and !carrying)
 {
@@ -123,8 +107,7 @@ if (follows and !carrying)
     }
     if (mate != -1)
     {
-        // Keep the ally between me and whatever I am looking at. Horizontal
-        // only: a place to stand is a one-dimensional choice on a surface.
+        // Keep the ally between me and my target; horizontal only.
         wantX = mate.x;
         if (targetChar != -1)
         {
@@ -140,7 +123,6 @@ if (follows and !carrying)
         global.botRetOffset = 0;
         return true;
     }
-    // Nobody to follow: walk the objective like everyone else.
 }
 
 found = false;
@@ -188,7 +170,7 @@ else if (instance_exists(ControlPoint))
 }
 else
 {
-    // Team Deathmatch: the only mode with nothing in the world to walk to.
+    // Team Deathmatch.
     found = botObjectiveDeathmatch(bot, char, cls, targetChar);
     wx = global.botRetX;
     wy = global.botRetY;
@@ -200,9 +182,7 @@ else
     useSpot = global.botRetUseSpot;
 }
 
-// --- the flag is in somebody's hands -----------------------------------------
-// A carried flag has no instance, so the cascade had nothing: chase the moving
-// carrier directly - our thief, or the team-mate running theirs home.
+// Flag carried: chase the carrier.
 if (chase != -1)
 {
     carrier = botObjectiveCarrier(chase);
@@ -215,7 +195,7 @@ if (chase != -1)
         global.botRetOffset = 0;
         return true;
     }
-    // Changed hands or returned in between: keep whatever goal the bot had.
+    // Carrier gone (changed hands or returned): keep the current goal.
 }
 
 if (!found)
@@ -228,17 +208,15 @@ if (!found)
     return false;
 }
 
-// --- somebody is taking our point --------------------------------------------
-// Every "stand somewhere better" behaviour is wrong while an enemy is in the zone.
+// An enemy in the zone cancels holding.
 if (contested)
     held = false;
 
-// --- does this bot's class want to stand somewhere else? ----------------------
+// Class positioning only where the objective is to cover, not reach.
 spotMode = botClassProfileSpotMode(cls);
 classWants = false;
 if (spotMode != BOT_SPOT_NONE and !carrying)
 {
-    // Only where the objective is something to cover rather than to reach.
     if (spotMode == BOT_SPOT_STANDOFF)
         classWants = (defending or held or useSpot);
     else if (spotMode == BOT_SPOT_CHOKE)
@@ -247,13 +225,12 @@ if (spotMode != BOT_SPOT_NONE and !carrying)
         classWants = !mustTouch;
 }
 
-// A defender's class opinion does not survive its point being taken; an
-// attacker's does.
+// A defender drops its class spot when contested; an attacker keeps it.
 if (contested and defending)
     classWants = false;
 
-// A class with its own positioning opinion does not also take the generic push;
-// the engineer's chokepoint IS the push, applied to its anchor.
+// Class-positioned bots skip the generic push; the engineer's choke applies it
+// to its anchor.
 wantPush = ((held and !defending and !classWants) or (classWants and spotMode == BOT_SPOT_CHOKE));
 
 pushX = 0;
@@ -268,7 +245,6 @@ if (wantPush)
         pushX = (spawnX - wx) * BOT_PUSH_FRAC;
         pushY = (spawnY - wy) * BOT_PUSH_FRAC;
         len = point_distance(0, 0, pushX, pushY);
-        // Capped: loitering outside an enemy spawn gives up the thing held.
         if (len > BOT_PUSH_DIST)
         {
             pushX = pushX * BOT_PUSH_DIST / len;
@@ -277,7 +253,7 @@ if (wantPush)
     }
 }
 
-// --- the point is already ours: hold it, or push past it ---------------------
+// Held: defender overlooks the point; attacker pushes past it.
 if (held)
 {
     if (defending)
@@ -296,7 +272,7 @@ if (held)
     }
 }
 
-// --- per-class positioning: REPLACES the shared band -------------------------
+// Class positioning replaces the shared band.
 if (classWants)
 {
     range = botTargetingClassRange(cls);
@@ -314,24 +290,20 @@ if (classWants)
         spotMin = max(spotMin, spotMax * BOT_SPOT_NEAR_FRAC);
     else if (spotMode == BOT_SPOT_CHOKE)
     {
-        // The ANCHOR moves toward where the attack comes from, and a bare point
-        // on a route needs no sightline (it can be inside a wall).
+        // Anchor moves toward the attack; no sightline needed.
         anchorX += pushX;
         anchorY += pushY;
         spotLos = BOT_LOS_ANY;
     }
     else if (spotMode == BOT_SPOT_FLANK)
     {
-        // Near the objective with no sightline to it.
+        // No sightline to the objective.
         spotLos = BOT_LOS_AVOID;
     }
 }
 
-// --- the bot has been standing on this goal doing nothing --------------------
-// Ask for a DIFFERENT place: the hold band, replacing the class's, refusing the
-// node it stands on, proximity only. Anchored on the objective, or - the last
-// resort, once nothing around the objective had a route - on the bot itself,
-// with no distance guard (that annulus is what is empty in the pockets this is for).
+// Re-post: hold band, excluding own node, proximity only; anchored on the
+// objective, or on the bot (repostNearBot, no distance guard).
 avoidRadius = 0;
 avoidNode = -1;
 selfNode = -1;
@@ -367,8 +339,7 @@ if (reposting)
 
 if (useSpot and allowSpot)
 {
-    // The node already chosen for this same question is held rather than
-    // re-decided from wherever the walk has reached; a re-post wants a new one.
+    // Reuse the held node for the same question, except when re-posting.
     sameQuestion = false;
     if (bot.botObjectiveSpotNode >= 0)
     {
@@ -412,15 +383,12 @@ if (useSpot and allowSpot)
         return true;
     }
 
-    // Nothing qualified: fall through to the objective's own point, and forget
-    // the held node - its band has nothing in it any more.
+    // Nothing qualified: use the objective point and drop the held node.
     bot.botObjectiveSpotNode = -1;
 }
 
-// --- spread ------------------------------------------------------------------
-// Never on a goal that has to be TOUCHED (the intel, its base) or a contested
-// point: an offset there is standing next to the game mode instead of playing
-// it. A defender stands BOT_DEFEND_RADIUS beside what it guards, even at 0.
+// Spread: none on must-touch or contested goals; defenders add
+// BOT_DEFEND_RADIUS.
 if (mustTouch or contested)
     spreadX = 0;
 else if (defending)

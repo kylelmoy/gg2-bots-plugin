@@ -1,27 +1,16 @@
-// botTargetingFind(player, range): BotTargeting.Find - botFindTarget.gml.
-// Picks the thing this bot should shoot at, or nothing. Returns the BotTarget
-// flattened:
-//   global.botRet         Exists (true/false)
+// botTargetingFind(player, range): BotTargeting.Find - the target to shoot.
+// Returns:
+//   global.botRet         exists
 //   global.botRetKind     BOT_TARGET_KIND_*
-//   global.botRetSlot     the target's Player instance for a character, the
-//                         Sentry / Generator instance otherwise (Identity)
-//   global.botRetX/Y      where to aim: a character's origin (its chest), the
-//                         CENTRE of a sentry's or generator's box
-//   global.botRetVisible  false for a target chosen through a wall
-// Scored by threat, in pixels, lowest first:
-//   character = distance - 300 carrying the intel
-//               - BOT_ATTACKER_BONUS shot me personally recently (not by its sentry)
-//               - 120 medic / - 60 engineer - 100 at or under 40% hp
-//               + range inside my class's minimum band;     floored at 1
-//   sentry    = distance - BOT_SENTRY_BONUS
-//               - BOT_ATTACKER_BONUS this sentry is what is shooting me
-//               + range inside my class's minimum band;     floored at 1
-//   generator = BOT_GEN_THREAT + distance (only when nothing live is there)
-// Line of sight is tested when a candidate is POPPED, so the collision line
-// runs for the best candidates only; if every candidate is blocked, the
-// nearest one inside BOT_BLIND_RANGE is returned with Visible false.
-// DEPARTURE (docs/departures/combat.md): ties are broken by ds_priority, not
-// by roster slot.
+//   global.botRetSlot     Player for a character, else the Sentry/Generator
+//   global.botRetX/Y      character origin, or building box centre
+//   global.botRetVisible  false if chosen through a wall
+// Threat, lowest first, floored at 1: distance - 300 intel - BOT_ATTACKER_BONUS
+// if it shot me - 120 medic / - 60 engineer - 100 at <= 40% hp + range inside
+// the min band. Sentry: distance - BOT_SENTRY_BONUS, same attacker/band terms.
+// Generator: BOT_GEN_THREAT + distance. Sight tested on pop; if all blocked,
+// nearest within BOT_BLIND_RANGE, not visible. DEPARTURE: ties broken by
+// ds_priority, not roster slot.
 var p, range, me, myTeam, mx, my, mxs, minBand, q, dist, threat, dealer, source;
 var cand, kind, cx, cy, blind, blindKind, blindX, blindY, blindDist, vis, sentryObj;
 p = argument0;
@@ -50,8 +39,7 @@ if (!variable_global_exists("botTargetingQueue"))
 q = global.botTargetingQueue;
 ds_priority_clear(q);
 
-// Characters. A cloaked spy is not a candidate at all until its knife
-// animation puts it on the screen in front of this bot (botVisibilityCanSee).
+// Cloaked spies only while stabbing in front (botVisibilityCanSee).
 with (Character)
 {
     if (id == me)
@@ -75,9 +63,8 @@ with (Character)
     threat = dist;
     if (intel)
         threat -= 300;
-    // A sentry's damage names its OWNER as the dealer, so the source is what
-    // tells an engineer's shotgun from the gun it built; exactly one of the two
-    // loops awards the bonus.
+    // Sentry damage names the owner as dealer; the source decides which loop
+    // gets the bonus.
     if (player == dealer and source != sentryObj)
         threat -= BOT_ATTACKER_BONUS;
     if (player.class == CLASS_MEDIC)
@@ -86,13 +73,12 @@ with (Character)
         threat -= 60;
     if (hp <= maxHp * 0.4)
         threat -= 100;
-    // The lock-breaker: anyone inside the band ranks a whole radius worse.
+    // Inside the min band: a whole radius worse.
     if (dist < minBand)
         threat += range;
     ds_priority_add(q, id, max(1, threat));
 }
 
-// Sentries: rank a little ahead of a player at the same distance.
 with (Sentry)
 {
     if (team == myTeam)
@@ -110,7 +96,6 @@ with (Sentry)
     ds_priority_add(q, id, max(1, threat));
 }
 
-// The enemy generator, far past any distance term.
 with (Generator)
 {
     if (team == myTeam)

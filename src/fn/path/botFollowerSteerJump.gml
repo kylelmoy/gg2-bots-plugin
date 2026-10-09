@@ -1,19 +1,9 @@
 // botFollowerSteerJump(player, char, edge, current, next, column, dirToNext,
 //                      team, hasIntel, setupGatesClosed, canDoubleJump,
 //                      canRocketJump, canStickyJump)
-// PathFollower.SteerJump: a jump, double-jump, rocket-jump or sticky-jump arc -
-// the takeoff gate on the ground, the position tracker in the air. Writes the
-// Steering globals (global.botFollowerSteer*). The query is the LIVE one.
-//
-// An arc is flown as a TRAJECTORY, not as a speed. The generator validated
-// one arc - leave the takeoff column, cover Bucket px of ground a tick, be over
-// the landing when it comes down - and tracking a POSITION corrects both a
-// slow start and any nudge in the air: behind is a reason to press, ahead a
-// reason to brake. Measured: 12-19% of jumps landed on the aimed-at node
-// before, 100% after.
-//
-// PathFollower.Approach is inlined below (marked); it runs every tick of the
-// walk to the takeoff column.
+// PathFollower.SteerJump: any jump arc - approach and gate on the ground, a
+// position tracker in the air. Writes global.botFollowerSteer*; live query.
+// Approach is inlined (marked).
 var p, char, edge, current, nxt, column, dirToNext, qDJ, edges, nodes;
 var tx0, tx1, takeoff, needVx, flightTicks, jumpDistance, jumpDir, along;
 var etype, isRocket, rejump;
@@ -31,9 +21,7 @@ nodes = global.botNavNodes;
 tx0 = ds_grid_get(nodes, NAV_NODE_X0, nxt);
 tx1 = ds_grid_get(nodes, NAV_NODE_X1, nxt);
 
-// The takeoff column is carried ON THE EDGE because the generator SEARCHED for
-// it; re-deriving it from the node's own columns would jump from a column the
-// build already rejected.
+// Takeoff from the edge; node end only if the edge has none.
 takeoff = ds_grid_get(edges, NAV_EDGE_TAKEOFF, edge);
 if (takeoff < 0)
 {
@@ -43,22 +31,18 @@ if (takeoff < 0)
         takeoff = ds_grid_get(nodes, NAV_NODE_X0, current);
 }
 
-// Ticks are counted rather than read off vspeed, which pins at 10 once the
-// fall reaches terminal velocity.
 needVx = ds_grid_get(edges, NAV_EDGE_BUCKET, edge);
 flightTicks = ds_grid_get(edges, NAV_EDGE_TICKS, edge);
 jumpDistance = needVx * flightTicks;
 
-// The generator's own direction: the side of the takeoff column the landing is
-// on. A wide surface can straddle the midpoint test.
+// Side of the takeoff column the landing is on.
 jumpDir = dirToNext;
 if (tx0 > takeoff)
     jumpDir = 1;
 else if (tx1 < takeoff)
     jumpDir = -1;
 
-// Speed ALONG THE JUMP, not speed: `abs(hspeed) <= needVx + 1` is satisfied by
-// a bot drifting the wrong way at 2 px/tick.
+// Signed speed along the jump.
 along = char.hspeed * jumpDir;
 etype = ds_grid_get(edges, NAV_EDGE_TYPE, edge);
 isRocket = etype == NAV_EDGE_ROCKETJUMP;
@@ -67,17 +51,11 @@ if (!char.onground)
 {
     p.botPathAirTicks += 1;
 
-    // The rocket (or mine) did not go off, so this is not the arc that was
-    // planned: moveStatus 1 is set by the blast itself, and without it this is
-    // an ORDINARY jump. Abandon (no keys) and let the landing be adjudicated
-    // by the off-route machinery, which gives the edge one retry.
-    // `AirTicks > 1`, not `>= 1`: the blast lands in the same tick's
-    // simulation as the takeoff press, so tick one is always moveStatus 0.
+    // Dud: no blast (moveStatus != 1) after tick one; abandon to off-route.
     if ((isRocket or etype == NAV_EDGE_STICKYJUMP)
         and p.botPathAirTicks > 1
         and char.moveStatus != 1)
     {
-        // Once per attempt: tick two is the first that can see a dud.
         if (p.botPathAirTicks == 2)
             p.botPathRocketDuds += 1;
 
@@ -85,10 +63,7 @@ if (!char.onground)
         return 0;
     }
 
-    // The second impulse on a double-jump arc, at the tick the generator
-    // proved it (-1 on every other kind). A PRESS, not a hold; a once-only
-    // flag rather than an equality on the tick. CanDoubleJump is the live
-    // query's: a route outlives the plan that made it.
+    // Double jump's second press, once, at the edge's REJUMP tick (-1: none).
     rejump = ds_grid_get(edges, NAV_EDGE_REJUMP, edge);
     if (rejump >= 0 and !p.botPathRejumped and qDJ
         and p.botPathAirTicks >= rejump)
@@ -98,16 +73,13 @@ if (!char.onground)
         p.botPathDoubleJumps += 1;
     }
 
-    // Where the plan says to be now, clamped at the landing so a late bot
-    // keeps pressing toward it rather than aiming past it.
+    // Planned x now, clamped at the landing.
     global.botFollowerSteerTrackX = takeoff * NAV_CELL_SIZE + NAV_BOX_W * NAV_CELL_SIZE / 2
         + jumpDir * min(jumpDistance, needVx * p.botPathAirTicks);
 
     global.botFollowerSteerTracking = true;
 
-    // The rocket arc's tracker is SPEED-GATED where every other arc's is not:
-    // with no friction under it, a press past the arc's own vx gains nothing
-    // and is what made the real tracker limit-cycle.
+    // Rocket arcs (no friction) gate presses on speed.
     global.botFollowerSteerTrackGate = isRocket;
     global.botFollowerSteerTrackNeedVx = needVx;
     global.botFollowerSteerTrackAlong = along;
@@ -122,9 +94,7 @@ if (abs(column - takeoff) > BOT_JUMP_LEAD)
     // ---- Approach, inlined ------------------------------------------------
     if (p.botPathRunupAt >= 0)
     {
-        // Backing up: walk to the mark, then turn round and accelerate at the
-        // takeoff column over the whole distance just walked. Arrival is
-        // BOT_ENTRY_LEAD rather than exact, as every other target column is.
+        // Run-up: reach the mark, then head for the takeoff.
         if (abs(column - p.botPathRunupAt) <= BOT_ENTRY_LEAD)
         {
             p.botPathRunupAt = -1;
@@ -138,9 +108,7 @@ if (abs(column - takeoff) > BOT_JUMP_LEAD)
         return 0;
     }
 
-    // Approaching: arrive at about the arc's speed rather than sprinting at
-    // the gate - but only over the last BOT_RUNUP_CELLS (bleeding speed for the
-    // whole leg cost 30-50% on the valley scenarios).
+    // Brake to the arc's speed only within BOT_RUNUP_CELLS of takeoff.
     if (along > needVx + BOT_JUMP_VTOL
         and abs(column - takeoff) <= BOT_RUNUP_CELLS)
     {

@@ -1,16 +1,7 @@
-// botObsInit(): the observation's shared state, made once by
+// botObsInit(): the observation's shared state; called once by
 // botPolicyNetLoad.
-//
-// global.botObsGrid    ds_grid 1 x 211: the observation botObsWrite fills and
-//                      botPolicyNetAct reads, row i = ObservationWriter column i
-// global.botObsMaxHp[class], ...MaxAmmo, ...ReloadTime, ...RefireTime
-//                      ClassStats.MaxHp and WeaponStats for KindFor(class) -
-//                      the C# normalises by these constants, not by the live
-//                      weapon's fields. Checked against the game: each class's
-//                      Create (maxHp, weapons[0]) and each weapon's Create
-//                      (maxAmmo, reloadTime, refireTime) agree.
-// global.botObsProjObj[k] the GM8 object for ProjectileKind k + 1, k = 0..8
-// global.botObsRayDx[i], ...RayDy[i]  ObservationWriter.RayDirections
+// global.botObsGrid: ds_grid 1 x 211, row i = ObservationWriter column i.
+// Per-class stats are ClassStats/WeaponStats constants.
 var i, a;
 global.botObsGrid = ds_grid_create(1, BOT_OBS_LENGTH);
 
@@ -58,11 +49,8 @@ global.botObsRefireTime[CLASS_SPY] = 18;
 global.botObsRefireTime[CLASS_PYRO] = 1;
 global.botObsRefireTime[CLASS_QUOTE] = 5;
 
-// ProjectileKind minus one (None has no column): Shot, Rocket, Mine, Flame,
-// Needle, Flare, Blade, Bubble, Stab. Blade is the thrown BladeB and Stab the
-// knife's StabMask (gg2-server Weapons.Melee.cs). Every one is created with
-// `team` set (createShot, or the creator right after instance_create), and
-// none of the nine has a child object, so each with() visits only its own.
+// ProjectileKind - 1: Shot, Rocket, Mine, Flame, Needle, Flare, Blade,
+// Bubble, Stab. All set `team`; none has a child object.
 global.botObsProjObj[0] = Shot;
 global.botObsProjObj[1] = Rocket;
 global.botObsProjObj[2] = Mine;

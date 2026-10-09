@@ -1,10 +1,6 @@
-// botBrainService(): once a tick, after the map check and the population.
-//
-// gg2-server tells its bots about their place in the roster at three moments:
-// a new graph (BotPopulationService.MapChanged -> SetMap, then Retarget), a
-// change of team or roster (Retarget) and a change of class (Rerole). Here the
-// same moments are noticed rather than announced: the graph generation, and a
-// signature of every bot's team and of every bot's class.
+// botBrainService(): once a tick, after the map check and population. Polls for
+// the C# SetMap/Retarget/Rerole moments: nav generation, team and class
+// signatures.
 var sig, csig, gen, i, pl;
 
 gen = global.botNavGeneration;

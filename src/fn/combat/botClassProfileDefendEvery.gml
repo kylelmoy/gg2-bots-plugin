@@ -1,7 +1,6 @@
-// botClassProfileDefendEvery(class): BotClassProfile.DefendEvery - one bot in
-// every N of this class's lean group defends. A period, not a veto - except
-// the medic, BOT_DEFEND_NEVER (0), which also drops medics out of every other
-// class's lean-group count.
+// botClassProfileDefendEvery(class): BotClassProfile.DefendEvery - one in every
+// N of the lean group defends. Medic: BOT_DEFEND_NEVER (0), also excluded from
+// other counts.
 switch (argument0)
 {
     case CLASS_ENGINEER:

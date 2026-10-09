@@ -1,23 +1,8 @@
-// botHybridInit(player): every per-bot field the policy module owns, set once
-// when the bot joins (HybridBot's, PolicyController's and ActionDecoder's
-// fields; there is one of each per bot). Nothing here is a ds_ structure.
-//
-// HybridBot:
-//   botHybridDriving          the tier holding the wheel, -1 for the scripted layer
-//   botHybridBubble           the bubble a handover asked for, -1 for none
-//   botHybridBubbleShown      the last bubble sent (what clients show), -1 for none
-//   botHybridBubbleSentAt     the botHybridCommandPolls it went out on
-//   botHybridCommandPolls     botHybridPollCommands calls so far (its own clock)
-//   botHybridHandicapAim      aim error in wire units, held between draws
-//   botHybridHandicapHoldFire the hold-fire roll of the current draw
-//   botHybridHandicapTicksLeft controller-driven ticks until the next draw
-//   botHybridMicroDrove, botHybridDecidedThisPoll   the last poll
-//   botHybridMicroTicks, botHybridMicroDecisions, botHybridScriptedTicks,
-//   botHybridScriptedPolls    counters; ScriptedPolls == MicroTicks + ScriptedTicks
-// PolicyController / ActionDecoder:
-//   botPolicyTicksLeftInDecision, botPolicyDecidedThisPoll,
-//   botPolicyActionHorizontal, ...Jump, ...Down, ...Fire, ...AimDelta, ...Zoom,
-//   botActionDecoderAim (degrees)
+// botHybridInit(player): initialise the per-bot fields of HybridBot,
+// PolicyController and ActionDecoder.
+// botHybridDriving: tier at the wheel, -1 scripted.
+// botHybridBubble/BubbleShown: -1 none. BubbleSentAt: in CommandPolls.
+// ScriptedPolls == MicroTicks + ScriptedTicks.
 var pl;
 pl = argument0;
 pl.botHybridDriving = -1;

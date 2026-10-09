@@ -1,8 +1,5 @@
-// botPopulationService(): gg2-server's BotPopulationService.Service, once a tick.
-//
-// Put every bot on a team (a map change drops the whole roster to spectator,
-// and a bot has no menu to answer), re-roll the class of a bot that died or is
-// over its limit, then add or remove bots towards the target.
+// botPopulationService(): BotPopulationService.Service, once a tick - reteam,
+// reclass, then add or remove bots towards the target.
 var humans, bots, joining, target, reserve, red, blue, team, cls, toRemove, pick;
 
 humans = 0;
@@ -27,9 +24,8 @@ if (!global.botEnabled or humans < global.botMinHumans)
 else
     target = min(global.botMaxBots, max(0, global.botFillToPlayers - humans));
 
-// A bot holds a real slot, so leave one free for the next person to arrive:
-// RESERVE_SLOT refuses a joiner when the roster is at PlayerLimit, and a bot
-// leaving afterwards does not help them. gg2-server has no such limit to keep.
+// Keep one slot free for the next person (RESERVE_SLOT refuses at PlayerLimit).
+// Not in the C#.
 reserve = getNumberOfOccupiedSlots();
 with (JoiningPlayer)
     if (!occupiesSlot)
@@ -53,7 +49,7 @@ if (bots + joining < target)
 }
 else if (bots > target)
 {
-    // A dead bot first, so nobody watches a character vanish; else the newest.
+    // A dead bot first, else the newest.
     repeat (bots - target)
     {
         pick = noone;

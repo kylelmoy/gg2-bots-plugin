@@ -1,21 +1,9 @@
-// navSearchLiveChainCost(node): NavSearch.LiveChainCost - the distance table's
-// next-hop chain from node to the current search's goal, priced at what THIS
-// asker would pay for it now, or NAV_INF if a hop is gated, blacklisted, out
-// of class or missing. Only valid inside navSearchFind, whose asker, modifiers
-// and table it reads from global.navSearchQ*.
-//
-// Memoised per search in the scratch's NAV_SEARCH_LIVE column (-1 = not
-// walked), so a chain walked from one node is not walked again from any node
-// on it. Iterative, with the walk's stack in the NAV_SEARCH_WALK column.
-//
-// Each hop is priced as NavSearch.LiveEdgeCost does (inlined here): the
-// cheapest ROUTABLE edge between the pair under the lane's or the graph's
-// cost, refused whole if the pair is blacklisted and multiplied whole by its
-// crowd. At or above the table's distance by construction. The routable test
-// is navGraphEdgeRoutable's rule, inlined - keep the copies identical.
-//
-// "Infinity" saturates at NAV_INF so that one broken chain never looks
-// cheaper than another.
+// navSearchLiveChainCost(node): NavSearch.LiveChainCost - live cost of the
+// table's next-hop chain from node to the search goal; NAV_INF if any hop is
+// unroutable or missing. Only inside navSearchFind (reads global.navSearchQ*).
+// Memo: NAV_SEARCH_LIVE column (-1 = unwalked); stack: NAV_SEARCH_WALK.
+// Hop cost inlines LiveEdgeCost and navGraphEdgeRoutable; keep identical.
+// Saturates at NAV_INF.
 var node, goal, sc, n, edges, buf, nextRow, walkLen, at, hop, tail, i, from, to, memo;
 var blocked, occ, lane, lanes, crowd, key, best, e, eEnd, gate, ok, kind, cost;
 node = argument0;
@@ -32,7 +20,7 @@ edges = global.botNavEdges;
 buf = global.navDistBuffer;
 nextRow = global.navSearchQNextRow;
 
-// Climb to the goal, to a node already priced, or off the end of the chain.
+// Walk until goal, a memoised node, or chain end.
 walkLen = 0;
 at = node;
 while (true)
@@ -55,9 +43,7 @@ while (true)
         at = hop;
 }
 
-// What the rest costs from where the walk stopped: nothing at the goal, the
-// memo at a node already walked, infinity off the end of a broken chain (no
-// hop, or a cycle).
+// Cost beyond where the walk stopped.
 if (at == goal)
     tail = 0;
 else if (at >= 0)

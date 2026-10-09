@@ -1,5 +1,5 @@
-// botOccupancyEdgeCount(team): BotOccupancy.EdgeCount - how many edges that
-// team currently has anything on (0 for a team that fields no bots).
+// botOccupancyEdgeCount(team): BotOccupancy.EdgeCount - edges with a nonzero
+// count for team; 0 for a non-playing team.
 if (argument0 == TEAM_RED)
     return ds_map_size(global.botOccupancyRed);
 if (argument0 == TEAM_BLUE)

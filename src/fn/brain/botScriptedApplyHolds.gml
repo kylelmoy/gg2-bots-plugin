@@ -1,8 +1,6 @@
-// botScriptedApplyHolds(player, char, navKeys): ScriptedBot.ApplyHolds - the
-// regroup hold, the engage hold and the back-off band. Each overrides the
-// follower's horizontal keys, and only on the ground and not part-way through
-// a validated arc: stripping LEFT/RIGHT mid-jump is a different jump.
-// Returns the adjusted keys.
+// botScriptedApplyHolds(player, char, navKeys): ScriptedBot.ApplyHolds -
+// regroup hold, engage hold, back-off band. Grounded and not mid-arc only.
+// Returns keys.
 var p, char, navKeys, mates, distance, range, goalDist, closeIn, stepDir, safe, minBand;
 p = argument0;
 char = argument1;
@@ -14,21 +12,19 @@ if (!char.onground or p.botPathFlyingEdge)
 if (global.botTick < p.botScriptedRegroupUntil)
 {
     mates = botScriptedCountMatesNear(p, char);
-    // Wait for company, not for a crowd: a pair, not the whole team as one body.
     if (mates >= BOT_REGROUP_CROWD or mates >= BOT_REGROUP_MATES)
         p.botScriptedRegroupUntil = 0;
     else
     {
         navKeys &= ~(BOT_KEY_LEFT | BOT_KEY_RIGHT);
-        // The follower ran its stuck detector on the keys it intended to press.
+        // Stuck detector saw the intended keys.
         p.botPathStuckTicks = 0;
     }
 }
 
 if (!p.botCombatTargetExists or !p.botCombatVisible)
 {
-    // Cleared, not left alone: the hold is time-bounded, and HybridBot's
-    // handover reads this.
+    // HybridBot's handover reads this.
     p.botScriptedWantsToEngage = false;
     return navKeys;
 }
@@ -36,8 +32,7 @@ if (!p.botCombatTargetExists or !p.botCombatVisible)
 distance = point_distance(char.x, char.y, p.botCombatTargetX, p.botCombatTargetY);
 range = botTargetingClassRange(p.class);
 
-// Stand and fight instead of walking past - unless carrying, near the goal,
-// or the hold has run BOT_ENGAGE_TICKS since the target was acquired.
+// Hold to fight unless carrying, near the goal, or past BOT_ENGAGE_TICKS.
 if (p.botPathHasGoal)
     goalDist = point_distance(char.x, char.y, p.botPathGoalX, p.botPathGoalY);
 else
@@ -51,8 +46,7 @@ if (p.botScriptedWantsToEngage)
 {
     navKeys &= ~(BOT_KEY_LEFT | BOT_KEY_RIGHT);
     p.botPathStuckTicks = 0;
-    // A class that must be nearer than it can see (the pyro) walks in - but
-    // only where the ground holds, since no route validated this press.
+    // Close-in class (pyro) walks in, only onto safe ground.
     closeIn = botClassProfileCloseIn(p.class);
     if (closeIn > 0 and distance > closeIn)
     {
@@ -71,8 +65,7 @@ if (p.botScriptedWantsToEngage)
     }
 }
 
-// Back away from anything inside this class's minimum band. Replaces the
-// horizontal keys: pressing both directions is pressing neither.
+// Back off inside the class's min band; replaces the horizontal keys.
 minBand = botTargetingClassMinBand(p.class);
 if (minBand > 0 and distance < minBand)
 {

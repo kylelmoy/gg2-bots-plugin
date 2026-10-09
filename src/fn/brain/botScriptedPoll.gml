@@ -1,22 +1,14 @@
-// botScriptedPoll(player, char): ScriptedBot.Poll - the navigation half and the
-// combat half, ORed into one input.
-//
-// The follower owns LEFT / RIGHT / JUMP / DOWN, combat owns ATTACK, SPECIAL
-// and the aim; the two cannot conflict. Three behaviours live here because
-// only here sees both halves: the regroup hold, the engage hold and the
-// back-off band (botScriptedApplyHolds). gg2-server's ScriptedBot.cs has the
-// reasoning for every line; the comments here only mark where it is.
-//
-// char is player.object, -1 when dead. Returns keys in global.botRet, aim in
-// global.botRetAim (degrees) and aim distance in global.botRetAimDist.
+// botScriptedPoll(player, char): ScriptedBot.Poll - follower keys
+// (LEFT/RIGHT/JUMP/DOWN) ORed with combat keys (ATTACK/SPECIAL, aim). char is
+// -1 when dead. Returns keys; aim (degrees) in global.botRetAim, distance in
+// global.botRetAimDist.
 var p, char, navKeys, fireKeys, aim, aimDist, still, dodge, airJump, rocket;
 p = argument0;
 char = argument1;
 
 if (char == -1)
 {
-    // A dead bot gives up its route: it comes back somewhere else, and its
-    // edges stop being crowded the moment it stops walking them.
+    // Dead: drop the route and its occupancy.
     botOccupancyRemove(p);
     botPathFreePath(p);
     p.botScriptedAliveLast = false;
@@ -32,19 +24,15 @@ if (char == -1)
 
 botScriptedTrackCarrier(p, char);
 
-// A fresh life starts a fresh regroup hold, randomised so a whole team does
-// not leave on one frame.
+// New life: randomised regroup hold.
 if (!p.botScriptedAliveLast)
     p.botScriptedRegroupUntil = global.botTick + floor(random(BOT_REGROUP_TICKS));
 p.botScriptedAliveLast = true;
 
 botScriptedUpdateObjective(p, char);
 
-// The query is rebuilt from LIVE state every tick: a class can change
-// mid-life, a rocket jump depends on weapon and health, the team can be moved
-// by the autobalance, and the two gate terms change under the bot.
-// CanStickyJump is never set on a live bot (the C#'s `Query with { ... }`
-// leaves it at the constructor's false).
+// Query rebuilt from live state each tick. CanStickyJump stays false, as in the
+// C#.
 airJump = botClassProfileAirJump(p.class);
 rocket = botRocketCapable(char);
 p.botScriptedQueryTeam = p.team;
@@ -65,15 +53,13 @@ fireKeys = botCombatStep(p, char);
 aim = global.botRetAim;
 aimDist = global.botRetAimDist;
 
-// The launch hand-off: a rocket or sticky jump needs a key from each half, so
-// it is applied after both have run.
+// Rocket/sticky jumps need keys from both halves.
 fireKeys = botFollowerApplyLaunch(p, fireKeys, aim);
 aim = global.botRetAim;
 
 navKeys = botScriptedApplyHolds(p, char, navKeys);
 
-// Dodge an incoming rocket - grounded only, which keeps it out of every
-// planned arc, and the only thing that presses JUMP outside the follower.
+// Rocket dodge; grounded only, so never inside a planned arc.
 if (char.onground)
 {
     dodge = botReflexRocketDodge(p, p.botSkillReflexTicks, p.botSkillReflexMissChance);
@@ -81,9 +67,7 @@ if (char.onground)
         navKeys |= BOT_KEY_JUMP;
 }
 
-// Parked: grounded, pressing no direction, and exactly where it was last poll.
-// Keyed on the position, not on the follower's state - a bot holding a live
-// route it makes no progress on presses nothing and reports nothing.
+// Parked: grounded, no direction, same position as last poll.
 still = false;
 if (char.onground and (navKeys & (BOT_KEY_LEFT | BOT_KEY_RIGHT)) == 0 and p.botScriptedParkedValid)
     still = (char.x == p.botScriptedParkedX and char.y == p.botScriptedParkedY);
@@ -95,7 +79,6 @@ if (!still)
     p.botScriptedParkedTicks = 0;
 else if (!p.botScriptedWantsToEngage and global.botTick >= p.botScriptedRegroupUntil)
     p.botScriptedParkedTicks += 1;
-// Standing to fight, or waiting out the regroup hold, pauses the count.
 
 global.botRetAim = aim;
 global.botRetAimDist = aimDist;

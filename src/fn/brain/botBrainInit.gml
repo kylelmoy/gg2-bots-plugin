@@ -1,4 +1,4 @@
-// botBrainInit(): server start - the shared parts of the bot layer.
+// botBrainInit(): server start; shared bot-layer state.
 global.botNextStagger = 0;
 global.botBrainNavGeneration = -1;
 global.botBrainSignature = "";

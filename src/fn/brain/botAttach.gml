@@ -1,9 +1,5 @@
-// botAttach(player): a bot has just joined. Every module's per-bot state, in
-// one place, so a module's fields exist before anything reads them.
-//
-// The stagger is gg2-server's roster slot at the time the bot was added: both
-// cadences (the objective scan, the re-plan) are offset by it so a server full
-// of bots does not do all of its expensive work on one tick.
+// botAttach(player): a bot joined; init every module's per-bot state.
+// Stagger = join order; offsets the objective-scan and re-plan cadences.
 var p, s;
 p = argument0;
 s = global.botNextStagger;

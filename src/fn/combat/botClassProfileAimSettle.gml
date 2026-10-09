@@ -1,5 +1,5 @@
-// botClassProfileAimSettle(class): BotClassProfile.AimSettle - a multiplier on
-// BOT_AIM_SETTLE_DEG. A heavy may fire while still turning; a sniper may not.
+// botClassProfileAimSettle(class): BotClassProfile.AimSettle - multiplier on
+// BOT_AIM_SETTLE_DEG.
 switch (argument0)
 {
     case CLASS_HEAVY: return BOT_CP_SETTLE_LOOSE;

@@ -1,18 +1,8 @@
-// botArbiterChoose(eligible): DecisionQuotaArbiter.Choose - which eligible
-// tier may spend a decision now, most capable (lowest index) first, or -1 to
-// leave the wheel with the scripted layer.
-//
-// ONE budget for the whole server, so a firefight where several bots want a
-// decision on the same tick cannot spike it: global.botArbiterBudget
-// microseconds of decisions a tick ([Bots] Arbiter), against which each
-// tier's decision is priced at its MEASURED GML cost,
-// global.botPolicyNetCost[t] (botPolicyNetLoadFile, botPolicyDecide). A bot
-// refused here plays the tick on the scripted layer, which is a complete bot.
-//
-// Advisory and side-effect free apart from the per-tick reset: what is spent
-// is charged by botArbiterAdmitted only when a decision really happened.
-// Spent in poll order (with(Player) order), so the earliest-joined bots take
-// the budget first - deterministic, not fair, as the C#.
+// botArbiterChoose(eligible): DecisionQuotaArbiter.Choose - first eligible
+// tier (lowest index) whose cost fits, or -1 for the scripted layer.
+// One server-wide budget per tick (global.botArbiterBudget, us); tier t
+// costs global.botPolicyNetCost[t] (measured).
+// No charge here apart from the per-tick reset; botArbiterAdmitted charges.
 var eligible, remain, bit, t;
 eligible = argument0;
 if (global.botArbiterTick != global.botTick)

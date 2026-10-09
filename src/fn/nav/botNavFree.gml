@@ -1,6 +1,5 @@
-// botNavFree(): server stop. Frees everything botNavInit and the loads made.
-// A generator still running is left to finish on its own; it only writes
-// files.
+// botNavFree(): server stop; frees everything botNavInit and the loads made.
+// A running generator is left alone.
 if (!variable_global_exists("botNavAlive"))
     exit;
 if (!global.botNavAlive)

@@ -1,6 +1,5 @@
-// botAllyStillValid(player, ally): BotAlly.StillValid - is this (a Player
-// instance, or noone) still a team-mate worth beaming. Re-asked every tick: an
-// ally can die, change team, leave, or cloak between refreshes.
+// botAllyStillValid(player, ally): BotAlly.StillValid - is ally (a Player or
+// noone) still a live, uncloaked team-mate.
 var p, a, c;
 p = argument0;
 a = argument1;

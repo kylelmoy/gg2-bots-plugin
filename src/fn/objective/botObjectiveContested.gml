@@ -1,15 +1,7 @@
-// botObjectiveContested(point, team): BotObjective.Contested (botPointContested)
-// - an enemy of `team` is on this control point, or has already put progress on it.
-// `point` is a ControlPoint-family instance (ControlPoint, KothControlPoint,
-// KothRed/BlueControlPoint, ArenaControlPoint, ControlPoint1..5 - all inherit its
-// Create, which runs User Event 0 and sets every field read here).
-//
-// PRESENCE is the signal: ControlPoint's Step recomputes redPresence /
-// bluePresence (0 nobody, 1 only ubered, 2 cappers) every step from the
-// Characters standing in it, true the frame an enemy steps in, while the meter
-// takes a second. The meter is still read, because a capture under way stays
-// contested in the moment the zone is empty. A LOCKED point is contested by
-// nobody. C#'s `BeingCaptured` is cappingTeam != -1; `Capping` is capping.
+// botObjectiveContested(point, team): BotObjective.Contested
+// (botPointContested) - an enemy of `team` is on the point or has capture
+// progress on it. Locked = never contested. `point`: any ControlPoint-family
+// instance. Presence: 0 nobody, 1 only ubered, 2 cappers.
 var point, tm, enemyPresence;
 point = argument0;
 tm = argument1;

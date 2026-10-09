@@ -1,8 +1,5 @@
-// navGraphEdgesFrom(node): NavGraph.EdgesFrom - node's outgoing edges as a
-// contiguous range of global.botNavEdges rows.
-// Returns the first row (-1 when there are none) in global.botRet, and how
-// many in global.botRetCount (0 when there are none). An out-of-range node
-// has none.
+// navGraphEdgesFrom(node): NavGraph.EdgesFrom - first outgoing edge row in
+// global.botRet (-1 if none), count in global.botRetCount (0 if none).
 var n, first;
 n = argument0;
 global.botRetCount = 0;

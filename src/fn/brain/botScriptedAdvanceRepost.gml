@@ -1,6 +1,5 @@
-// botScriptedAdvanceRepost(player): ScriptedBot.AdvanceRepost - take the next
-// re-post candidate; once the whole ranked band has failed, ask for ground
-// near the bot instead and ban spots for a while.
+// botScriptedAdvanceRepost(player): ScriptedBot.AdvanceRepost - next re-post
+// candidate; once the whole band fails, ask near the bot and ban spots.
 var p;
 p = argument0;
 p.botScriptedRepostSkip = (p.botScriptedRepostSkip + 1) mod BOT_SPOT_TRIES;

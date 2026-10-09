@@ -1,13 +1,8 @@
 // botFollowerFollowEdge(player, char, moved, team, hasIntel, setupGatesClosed,
 //                       canDoubleJump, canRocketJump, canStickyJump)
-// PathFollower.FollowEdge: steers along the edge between the current node and
-// the next. Returns keys. The six query arguments are the LIVE query.
-//
-// The per-edge decision is PathFollower's private Steering struct, which lives
-// in globals for the length of this call (global.botFollowerSteer<Field>);
-// botFollowerSteerJump / botFollowerGate / botFollowerLaunch write it.
-// SteerFall and Press are inlined here (marked), being a few lines each and
-// run every tick.
+// PathFollower.FollowEdge: steers along the current edge. Returns keys; live
+// query. The Steering struct is global.botFollowerSteer<Field> for this call.
+// SteerFall and Press are inlined (marked).
 var p, char, moved, current, nxt, edge, etype, px, hs, onGround;
 var fx0, fx1, tx0, tx1, column, dirToNext, keys, targetX, takeoff, nodes;
 p = argument0;
@@ -21,9 +16,7 @@ onGround = char.onground;
 current = ds_list_find_value(p.botPathPath, p.botPathPathAt);
 nxt = ds_list_find_value(p.botPathPath, p.botPathPathAt + 1);
 
-// A new edge gets a fresh takeoff budget: BOT_TAKEOFF_PATIENCE is about one
-// jump refusing to happen, not about how long the bot has been walking. A
-// run-up belongs to the edge it was started for and goes with it.
+// New edge: reset takeoff budget and run-up.
 if (current != p.botPathEdgeFrom or nxt != p.botPathEdgeTo)
 {
     p.botPathTakeoffTicks = 0;
@@ -33,14 +26,11 @@ if (current != p.botPathEdgeFrom or nxt != p.botPathEdgeTo)
 p.botPathEdgeFrom = current;
 p.botPathEdgeTo = nxt;
 
-// The graph is rebuilt on every map change, and a route planned against the
-// old one names nodes that no longer connect.
 edge = botFollowerTryFindEdge(p, current, nxt);
 if (edge < 0)
 {
     p.botPathEdgeUnroutableFires += 1;
 
-    // char.y, not GoalY.
     botFollowerPlan(p, px, char.y, argument3, argument4, argument5, argument6, argument7, argument8);
     return 0;
 }
@@ -76,7 +66,7 @@ global.botFollowerSteerRocketFire = false;
 global.botFollowerSteerMineFire = false;
 global.botFollowerSteerMineDetonate = false;
 
-// Default: head for the near end of the next surface, a couple of cells in.
+// Default: a few cells into the near end of the next surface.
 if (column < tx0)
 {
     global.botFollowerSteerTargetColumn = min(tx1, tx0 + BOT_ENTRY_LEAD);
@@ -87,8 +77,7 @@ else if (column > tx1)
 }
 else
 {
-    // Already over the next surface's columns without being on it: keep going
-    // its way until NodeFromWorld agrees.
+    // Over its columns but not on it: keep going.
     global.botFollowerSteerTargetColumn = min(max(column + dirToNext * BOT_ENTRY_LEAD, tx0), tx1);
 }
 
@@ -97,21 +86,18 @@ etype = ds_grid_get(global.botNavEdges, NAV_EDGE_TYPE, edge);
 switch (etype)
 {
     case NAV_EDGE_DROPTHROUGH:
-        // From the middle of the run; DOWN disables the platform entirely.
+        // DOWN from mid-run.
         global.botFollowerSteerTargetColumn = floor((fx0 + fx1) / 2);
         break;
 
     case NAV_EDGE_FALL:
         // ---- SteerFall, inlined -------------------------------------------
-        // Which end cannot be re-derived here, which is why the edge carries
-        // it. Off the edge the modelled trajectory is a STRAIGHT VERTICAL DROP
-        // from the takeoff column, so the bot holds that column in the air -
-        // the EDGE's column, not the walk-off hint past the end of the run.
+        // In the air, hold the edge's takeoff column (a vertical drop).
         takeoff = ds_grid_get(global.botNavEdges, NAV_EDGE_TAKEOFF, edge);
 
         if (takeoff < 0)
         {
-            // A graph cached before falls carried a takeoff: the old guess.
+            // Edge has no takeoff: guess from the node ends.
             if (fx1 + 1 >= tx0 and fx1 + 1 <= tx1)
                 takeoff = fx1 + 1;
             else
@@ -142,12 +128,10 @@ switch (etype)
 
     case NAV_EDGE_WALK:
     case NAV_EDGE_MOVEBOX:
-        // A walk edge is walked; a move box carries the bot once on one.
         break;
 
     default:
-        // A graph from a newer generator degrades into a counted number rather
-        // than silently flying an arc nobody modelled.
+        // Unknown edge type: counted, not flown.
         p.botPathUnsupportedEdgeTicks += 1;
         break;
 }
@@ -159,8 +143,7 @@ if (etype == NAV_EDGE_DROPTHROUGH)
         keys = BOT_KEY_DOWN;
 }
 
-// The steering target is a direction hint, not a place to stop: once on it,
-// keep nudging the way the next node lies and let NodeFromWorld decide.
+// Target is a direction hint: once on it, keep pressing toward the next node.
 targetX = global.botFollowerSteerTargetColumn * NAV_CELL_SIZE + NAV_BOX_W * NAV_CELL_SIZE / 2;
 
 if (px < targetX - BOT_STEER_TOL)
@@ -172,8 +155,7 @@ else if (dirToNext > 0)
 else if (dirToNext < 0)
     keys = keys | BOT_KEY_LEFT;
 
-// Braking on the ground and the in-flight tracker both REPLACE the steering
-// keys rather than adding to them.
+// Braking and tracking replace the steering keys.
 if (global.botFollowerSteerBraking)
 {
     keys = keys & ~(BOT_KEY_LEFT | BOT_KEY_RIGHT);
@@ -187,11 +169,7 @@ else if (global.botFollowerSteerTracking)
 {
     keys = keys & ~(BOT_KEY_LEFT | BOT_KEY_RIGHT);
 
-    // Behind the plan is a press forward, ahead of it a press back. On a
-    // ROCKET arc each press is also gated on speed along the jump (TrackGate);
-    // which branch is catching up depends on the direction, and TrackAlong
-    // already carries that sign. GM8's `or` does not short-circuit, but every
-    // operand here is a plain read.
+    // Press toward TrackX; with TrackGate, only if speed along the jump allows.
     if (px < global.botFollowerSteerTrackX - 1)
     {
         if (!global.botFollowerSteerTrackGate
@@ -212,14 +190,12 @@ else if (global.botFollowerSteerTracking)
     }
 }
 
-// Before the jump press and before the stuck counter: the reference's
-// `return 0`, no keys at all.
+// Abandon: no keys, before the jump press and stuck counter.
 if (global.botFollowerSteerAbandon)
 {
     p.botPathRocketFire = false;
 
-    // And the setup, or a bot that abandoned mid-countdown detonates under a
-    // route it is no longer following.
+    // Also cancel any sticky setup.
     p.botPathMineFire = false;
     p.botPathMineDetonate = false;
     p.botPathStickySetup = -1;
@@ -228,9 +204,7 @@ if (global.botFollowerSteerAbandon)
 }
 
 // ---- Press, inlined -------------------------------------------------------
-// Jump is edge-triggered (Begin Step jumps on pressedKeys & $80), so a bot
-// holding JUMP jumps once and never again. Alternating gives a bot that still
-// wants to jump a fresh press every other tick.
+// Jump is edge-triggered: alternate to re-press every other tick.
 if (!global.botFollowerSteerWantJump)
 {
     p.botPathJumpHeld = false;
@@ -246,15 +220,12 @@ else
 }
 // ---------------------------------------------------------------------------
 
-// Out of the per-edge steering and onto the state, which is what
-// botFollowerApplyLaunch reads.
+// For botFollowerApplyLaunch.
 p.botPathRocketFire = global.botFollowerSteerRocketFire;
 p.botPathMineFire = global.botFollowerSteerMineFire;
 p.botPathMineDetonate = global.botFollowerSteerMineDetonate;
 
-// Gated on actually pressing something, unlike the arrival branch's: a bot
-// standing on its target waiting for a jump window would otherwise report
-// itself stuck.
+// Stuck only while pressing something.
 if (!moved and keys != 0)
     p.botPathStuckTicks += 1;
 else
@@ -265,7 +236,6 @@ if (p.botPathStuckTicks >= BOT_STUCK_TICKS)
     p.botPathStuckFires += 1;
     botPathBlacklistEdge(p, current, nxt);
 
-    // char.y, not GoalY.
     botFollowerPlan(p, px, char.y, argument3, argument4, argument5, argument6, argument7, argument8);
     return 0;
 }

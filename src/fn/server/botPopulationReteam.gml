@@ -1,8 +1,6 @@
-// botPopulationReteam(): BotPopulationService.Reteam. A bot on no team asks
-// for the smaller one - after a map change (serverGotoMap leaves everybody on
-// spectator) and after joining, should the first request have been refused.
-// At most once a second per bot: the request is answered next tick, and a
-// refusal (team balance) should not be asked again every frame.
+// botPopulationReteam(): BotPopulationService.Reteam - a bot on no team (after
+// a map change or a refused request) asks for the smaller one, at most once a
+// second.
 var red, blue, t;
 with (Player)
 {

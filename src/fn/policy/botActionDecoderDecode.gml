@@ -1,18 +1,9 @@
 // botActionDecoderDecode(player, firstTickOfDecision): ActionDecoder.Decode -
 // the held action (player.botPolicyAction*) as this tick's input.
-//
-// Returns the keys (global.botRet, BOT_KEY_* bits), the aim in wire units in
-// global.botRetAimNet (0..65535, PlayerInput.FromAim: round half away from
-// zero, clipped), the same aim in degrees in global.botRetAim, and the aim
-// distance, a fixed 100 px, in global.botRetAimDist.
-//
-// The mask is built fresh every tick, never OR-ed into the last one. Jump is
-// an EDGE in GG2, so its bit is sent on the first tick of a decision only, and
-// the turn is applied once per decision, not per tick - repeating it would
-// multiply the turn-rate cap by the action repeat. The decoder's absolute aim
-// is per bot: player.botActionDecoderAim, degrees in [0, 360).
-// The zoom head is not decoded: it is not a key, HybridBot issues no command
-// for it, and only a sniper (never policy-driven here) could use it.
+// Returns BOT_KEY_* bits; global.botRetAimNet (wire units 0..65535),
+// global.botRetAim (degrees), global.botRetAimDist (100 px).
+// Jump and the turn apply on a decision's first tick only.
+// player.botActionDecoderAim: degrees in [0, 360). Zoom head not decoded.
 var pl, first, keys, aim, t, net;
 pl = argument0;
 first = argument1;

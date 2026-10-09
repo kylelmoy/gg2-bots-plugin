@@ -1,5 +1,5 @@
-// botCombatDropTarget(player): BotCombatState.DropTarget - forgets the target
-// and everything derived from it (Target, Potshot, AimSubject).
+// botCombatDropTarget(player): BotCombatState.DropTarget - clears Target,
+// Potshot, AimSubject.
 var p;
 p = argument0;
 p.botCombatTargetExists = false;

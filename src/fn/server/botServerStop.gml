@@ -1,6 +1,5 @@
-// botServerStop(): the GameServer is being destroyed (the host left).
-// Players are destroyed with their own sockets by the game; what is ours is
-// the client end of every loopback connection and the shared structures.
+// botServerStop(): GameServer gone. Free the loopback client sockets and shared
+// state.
 var i;
 global.botRunning = false;
 if (!variable_global_exists("botJoining"))

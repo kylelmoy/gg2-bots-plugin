@@ -1,16 +1,7 @@
-// navGraphNodeFromWorld(worldX, worldY): NavGraph.NodeFromWorld
-// (navNodeFromWorld.gml) - the node a character standing at worldX, worldY is
-// on, or -1.
-//
-// NOT "the nearest node": the best-ranked one within three rows and two
-// columns, ranked dy * 4 + dx, so height outweighs horizontal distance. The
-// feet row is ROUNDED, not floored - GG2 rests a character a pixel above the
-// surface, and flooring puts it on the step above on stairs. GM8's round() is
-// half-to-even, which is exactly Gml.Round.
-//
-// Only seven mask rows can pass the dy test, so the search walks the row
-// index. Strict `<` on the rank and ascending rows: the lowest index wins.
-// Returns -1 when no graph is loaded.
+// navGraphNodeFromWorld(worldX, worldY): NavGraph.NodeFromWorld - node a
+// character at worldX, worldY stands on, or -1. Best rank dy * 4 + dx within
+// 3 rows / 2 columns; ties go to the lowest index. Feet row is rounded
+// (GM8 round is half-to-even, = Gml.Round).
 var mx, my, best, bestRank, rowLow, rowHigh, row, i, dy, dx, x0, x1, rank, nodes, n, rows;
 if (!global.botNavReady)
     return -1;

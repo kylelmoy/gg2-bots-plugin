@@ -1,17 +1,14 @@
-// botObsEnemies(player, char): ObservationWriter.WriteEnemies, rows 20..55,
-// two blocks of 18 for the two nearest living enemies (WorldView.NearestEnemies:
-// any live character on another team, by squared distance between origins,
-// ties to whoever was found first). Also leaves the nearest in
-// global.botObsEnemy0 (noone when there is none) and its squared distance in
-// global.botObsEnemy0D, for botObsGoal.
+// botObsEnemies(player, char): ObservationWriter.WriteEnemies - rows 20..55,
+// two 18-row blocks for the two nearest enemies (ties: first found).
+// Sets global.botObsEnemy0 (noone if none) and global.botObsEnemy0D
+// (squared distance) for botObsGoal. No visibility test.
 //   +0      present
 //   +1, +2  (enemy - self) position / 400
 //   +3, +4  (enemy - self) velocity / 15
-//   +5..13  enemy class one-hot (a Quote has no column)
-//   +14     enemy hp / its class's max
-//   +15,+16 sin, cos of the enemy's netAimDirection
-//   +17     time since seen: a fixed 0 in layout v2
-// No visibility test, as in the C#: a cloaked spy is observed like anyone.
+//   +5..13  class one-hot (no Quote column)
+//   +14     hp / class MaxHp
+//   +15,+16 sin, cos of netAimDirection
+//   +17     time since seen: always 0
 var pl, ch, g, cx, cy, myteam, e0, e1, d0, d1, d, i, e, at, ecls, aim;
 pl = argument0;
 ch = argument1;

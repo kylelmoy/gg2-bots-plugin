@@ -1,17 +1,9 @@
 // botJumpRunupColumn(node, takeoffColumn, jumpDirection, maxCells, team,
 //                    hasIntel, setupGatesClosed, canDoubleJump, canRocketJump,
 //                    canStickyJump)
-// JumpModel.RunupColumn (botRunupCol.gml): where a bot should back up to before
-// an arc it cannot currently make. Returns an anchor column; falls back to
-// takeoffColumn (no run-up) when there is nowhere to go.
-//
-// This follows WALK edges through the GRAPH, not the route, and that is the
-// whole point: clamping into the source node's own columns fails on a node one
-// column wide (a staircase's top step) - the run-up becomes a no-op. Modelled:
-// 3,310 unflyable jump edges -> 253, koth_gallery 105 -> 0. Walk edges are one
-// continuous floor by construction. Gates are honoured: a run-up through a
-// gate the bot cannot pass is a run-up into a wall. Only the gate half of the
-// query is read (NavGraph.EdgePassable).
+// JumpModel.RunupColumn: column to back up to before an arc, following
+// passable WALK edges in the graph up to maxCells. Returns takeoffColumn if
+// there is nowhere to go. Only the gate half of the query is read.
 var node, takeoff, dir, maxCells, qTeam, qIntel, qSetup;
 var nodes, edges, want, current, frontier, hop, best, bestSpan, start, stop, e, ok;
 var toNode, t0, t1;
@@ -32,8 +24,7 @@ edges = global.botNavEdges;
 want = takeoff - dir * maxCells;
 current = node;
 
-// The frontier is the far edge of the floor found so far, measured against
-// the jump: the end a bot backing up would reach next.
+// Frontier: the floor's far end away from the jump.
 if (dir > 0)
     frontier = ds_grid_get(nodes, NAV_NODE_X0, current);
 else
@@ -62,8 +53,6 @@ for (hop = 0; hop < BOT_RUNUP_HOPS; hop += 1)
 
     for (e = start; e < stop; e += 1)
     {
-        // Walk edges only: a fall or a jump backwards is leaving the floor the
-        // run-up is being built on.
         if (ds_grid_get(edges, NAV_EDGE_TYPE, e) != NAV_EDGE_WALK)
             continue;
 
@@ -107,7 +96,6 @@ for (hop = 0; hop < BOT_RUNUP_HOPS; hop += 1)
     frontier = bestSpan;
 }
 
-// Never further than asked for, and never further than the floor goes.
 if (dir > 0)
     return max(want, frontier);
 return min(want, frontier);

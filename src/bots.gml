@@ -1,14 +1,7 @@
-// gg2-bots: server-side bots for Gang Garrison 2, as a local plugin.
-//
-// The game runs every Plugins/*.gml at startup (loadplugins.gml), on clients
-// and hosts alike, so this file does as little as possible: it remembers where
-// its files are and hooks GameServer's End Step. Only when this game starts
-// hosting does it compile the bot layer - every function and hook listed in
-// bots/code/manifest.txt - and start it. A client that never hosts pays for
-// one object_event_add.
-//
-// Not transpiled by tools/botc.js: this is the code that makes transpiled code
-// callable, so it calls nothing through it except the two entry points, by hand.
+// gg2-bots: server-side bots for Gang Garrison 2, as a local plugin. Runs on
+// every client and host, so it only hooks GameServer's End Step; the bot layer
+// (bots/code/manifest.txt) is compiled and started on hosting. Not transpiled:
+// calls transpiled code only through its two entry points.
 
 global.botDir = directory + "bots\";
 global.botLoaded = false;
@@ -76,14 +69,9 @@ global.botLoad = '
     return true;
 ';
 
-// The bot layer starts on the first End Step of each GameServer instance.
-// Not its Create event: GameServerCreate ends in serverGotoMap -> room_goto,
-// and GM8 skips every remaining action of an event once room_goto has been
-// called - so an appended action runs only when the room change happens to be
-// queued behind another (a dedicated server's startup), and never when a
-// listen server is started from the Host menu. Measured both ways.
-// botStarted lives on the instance, so a new server - after leaving and
-// hosting again - starts afresh.
+// Start on each GameServer's first End Step, not Create: Create ends in
+// room_goto, and GM8 skips the rest of an event after room_goto. botStarted is
+// per instance.
 object_event_add(GameServer, ev_step, ev_step_end, '
     if (!variable_local_exists("botStarted"))
     {
@@ -95,10 +83,8 @@ object_event_add(GameServer, ev_step, ev_step_end, '
     }
 ');
 
-// Stopping is noticed from AudioControl (persistent, one per game, created in
-// game_init) rather than from GameServer's Destroy event, for the same reason
-// as above: Destroy ends in room_goto_fix, and GM8 runs none of an event's
-// remaining actions after a room_goto - so an appended action never would.
+// Stop is noticed from AudioControl (persistent): GameServer's Destroy also
+// ends in room_goto.
 global.botRunning = false;
 object_event_add(AudioControl, ev_step, ev_step_end, '
     if (global.botRunning)

@@ -1,7 +1,5 @@
-// navGraphEdgeStart(node): NavGraph.EdgeStart - where node's outgoing edges
-// begin in global.botNavEdges, or -1 if it has none or is out of range.
-// The i-th edge of navGraphEdgesFrom(node) is row EdgeStart(node) + i.
-// Hot loops should read global.botNavEdgeStart directly instead.
+// navGraphEdgeStart(node): NavGraph.EdgeStart - first outgoing edge row in
+// global.botNavEdges; -1 if none or out of range.
 var n;
 n = argument0;
 if (n < 0 || n >= global.botNavNodeCount)

@@ -1,12 +1,7 @@
-// botStickyReady(char) - StickyModel.Ready: could this character take a sticky
-// jump right now. The same shape as botRocketReady: refuse to leave the ground
-// rather than leave badly.
-//
-// `>` and not `>=` on hp: at exactly NAV_SJ_DAMAGE the demoman dies in the
-// air. Ammo is checked but a mine already placed is not - that is the
-// follower's state (botPathStickySetup). Nested ifs: GM8's `and` does not
-// short-circuit and currentWeapon may be -1 (`self`). The weapon kind is asked
-// of the weapon itself (docs/departures/path.md).
+// botStickyReady(char) - StickyModel.Ready: can sticky jump this tick (hp >
+// NAV_SJ_DAMAGE, Minegun ready, ammo). Departs: weapon kind is read off the
+// weapon instance.
+// Nested ifs: `and` does not short-circuit; currentWeapon -1 is self.
 var char, w;
 char = argument0;
 

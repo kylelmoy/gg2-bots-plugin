@@ -1,19 +1,9 @@
-// botHybridHandicap(player, keys, aimNet): HybridBot.Handicap - the scripted
-// layer's difficulty applied to what the policy pressed. Returns the keys;
-// the aim, in wire units, in global.botRetAimNet.
-//
-// Three BotSkill knobs (botSkill* on the Player, the combat module's), each
-// zero at the top tier so tier 5 is the checkpoint as trained and draws
-// nothing:
-// - the fire delay: no Attack until botSkillFireDelayTicks after the scripted
-//   layer acquired its target (botCombatTargetExists, botCombatTargetAt);
-// - an aim error, uniform within botSkillPolicyAimErrorDeg, held for
-//   botSkillAimInterval controller-driven ticks, added to the output only (the
-//   decoder keeps its own aim, so it never accumulates);
-// - the hold-fire roll, botSkillHoldFireChance, on the same draw.
-// Only Attack is withheld, never Special (an airblast or a detonation that
-// arrives late is not a reaction); movement is left alone.
-// Draws come from GM8's random() (PORTING.md), not ScriptedBot.Random.
+// botHybridHandicap(player, keys, aimNet): HybridBot.Handicap - skill
+// handicap on the policy's input. Returns keys; aim (wire units) in
+// global.botRetAimNet.
+// Fire delay after target acquired; aim error and hold-fire roll redrawn
+// every botSkillAimInterval ticks. Only Attack is withheld.
+// Departure: draws use GM8 random(), not ScriptedBot.Random.
 var pl, keys, net, reacting;
 pl = argument0;
 keys = argument1;
@@ -38,7 +28,7 @@ if (reacting or pl.botHybridHandicapHoldFire)
     if ((keys & BOT_KEY_ATTACK) != 0)
         keys -= BOT_KEY_ATTACK;
 
-// (ushort)(net + error): wraps.
+// wraps, as (ushort)
 net += pl.botHybridHandicapAim;
 net -= floor(net / 65536) * 65536;
 global.botRetAimNet = net;

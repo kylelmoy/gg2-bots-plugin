@@ -1,12 +1,7 @@
 // botAimSolve(char, targetX, targetY, targetVx, targetVy, leadMode, floorY):
-// BotAim.Solve - botAimSolve.gml. Where to point (degrees, GM8 convention) to
-// hit a target moving at (targetVx, targetVy), for the weapon model
-// botAimBallistics gives. floorY is the floor under the target
-// (botAimFloorUnder), BOT_AIM_NO_FLOOR when unknown.
-//   speed 0 (hitscan / beam)  straight at it
-//   BOT_LEAD_NONE             through the solver, gravity only
-//   BOT_LEAD_LINEAR           one pass from the current distance
-//   BOT_LEAD_FULL             the iterated intercept with the fall clamped
+// BotAim.Solve - aim direction in degrees. floorY: BOT_AIM_NO_FLOOR if unknown.
+// Speed 0 aims straight; BOT_LEAD_NONE gravity only; LINEAR one pass; FULL
+// iterated.
 var c, tx, ty, tvx, tvy, lead, spd, grav, drift, t, dir;
 c = argument0;
 tx = argument1;

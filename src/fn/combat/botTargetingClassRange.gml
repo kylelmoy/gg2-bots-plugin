@@ -1,6 +1,5 @@
-// botTargetingClassRange(class): BotTargeting.ClassRange - botClassRange.gml.
-// How far a bot of this class looks for something to shoot: an attention
-// radius, not a weapon range, and a tuned set.
+// botTargetingClassRange(class): BotTargeting.ClassRange - attention radius,
+// not weapon range.
 switch (argument0)
 {
     case CLASS_SCOUT: return 220;

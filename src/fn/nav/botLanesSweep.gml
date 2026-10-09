@@ -1,18 +1,9 @@
-// botLanesSweep(costLane, used, penalty, scratch, open): BotLanes.Sweep - mark,
-// in used (a 1 x edgeCount ds_grid), every edge the cheapest routes over a
-// fixed stride of legs use under lane costLane of global.botLanesCost: the
-// mark is writing penalty (botLanesDerive multiplies the lane by the column).
-// scratch is a BOT_LANES_FIELDS x nodeCount ds_grid, open an empty
-// ds_priority; both are the caller's.
-//
-// Dijkstra, not the bots' A*: lanes describe the graph's structure and must
-// not move when the search weight is tuned. Every 7th start, every 11th goal,
-// at most BOT_LANES_SWEEP_LEGS legs; one Dijkstra serves every goal from a
-// start.
-//
-// Lazy deletion with a closed flag instead of the C#'s `du > dist[u]`: pushes
-// happen only on a strict decrease, so the first pop of a node is its only
-// pop at dist[u] and the two tests skip exactly the same entries.
+// botLanesSweep(costLane, used, penalty, scratch, open): BotLanes.Sweep - write
+// penalty into used (1 x edgeCount ds_grid) for every edge on the cheapest
+// routes under lane costLane. scratch: BOT_LANES_FIELDS x nodeCount ds_grid;
+// open: empty ds_priority. Dijkstra from every 7th start to every 11th goal,
+// at most BOT_LANES_SWEEP_LEGS legs.
+// Departure: closed flag instead of the C#'s `du > dist[u]` check; same result.
 var costLane, used, penalty, sc, open, n, edges, lanes, legs, start, u, du, e, eEnd, v, nd, goal, at, guard, edge;
 costLane = argument0;
 used = argument1;

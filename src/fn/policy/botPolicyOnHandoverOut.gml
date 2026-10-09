@@ -1,3 +1,3 @@
-// botPolicyOnHandoverOut(player): PolicyController.OnHandoverOut - abandon a
-// part-finished decision, so a re-entry starts a fresh one.
+// botPolicyOnHandoverOut(player): PolicyController.OnHandoverOut - abandon
+// the current decision.
 argument0.botPolicyTicksLeftInDecision = 0;

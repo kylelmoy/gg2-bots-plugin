@@ -1,11 +1,7 @@
 // botReflexIncomingProjectile(player, minTravel, reflexTicks, missChance):
-// BotReflex.IncomingProjectile - botIncomingProjectile.gml. Is a reflectable
-// enemy projectile (Rocket, Flare, Mine - Flamethrower User Event 2's set)
-// somewhere the airblast can reach, having already flown minTravel px.
-// Both the projectile's position and its position one tick on are tested
-// (botReflexInBlastBeam, inlined), either will do. The radius test is only the
-// C#'s cheap pre-filter (reach + a tick of travel); the beam decides.
-// reflexTicks/missChance 0 is a perfect reflex.
+// BotReflex.IncomingProjectile - is a noticed enemy Rocket/Mine/Flare that has
+// flown minTravel px in the airblast beam, now or one tick on. The radius test
+// is a pre-filter.
 var p, me, myTeam, minTravel, rt, mc, mx, my, fx, fy, sx, sy, found, pass;
 var travelled, seen, dx, dy, fwd, hit, obj;
 p = argument0;
@@ -28,7 +24,7 @@ for (pass = 0; pass < 3; pass += 1)
 {
     if (found)
         break;
-    // with() over one object per pass; the body is the same for all three.
+    // One object per pass.
     if (pass == 0)
         obj = Rocket;
     else if (pass == 1)

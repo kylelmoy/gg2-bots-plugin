@@ -1,10 +1,7 @@
 // botBrainRetarget(full): BotPopulationService.Retarget (full) or Rerole (not).
-//
-// Each bot's role is BotRoles.Assign over the classes of the same team's bots
-// in LOWER roster positions, so the every-Nth-defends rule lands the same way
-// however the bots were added. A full retarget is ScriptedBot.Assign: also the
-// lateral spread, the query's team and air jump, and a FRESH objective layer -
-// the C# builds a new BotObjective every time, so none of its state survives.
+// Role = BotRoles.Assign over classes of same-team bots in lower roster slots.
+// Full also does ScriptedBot.Assign: spread, query team/air jump, a fresh
+// objective layer.
 var full, i, j, pl, other2, role, spread, airJump;
 full = argument0;
 for (i = 0; i < ds_list_size(global.players); i += 1)

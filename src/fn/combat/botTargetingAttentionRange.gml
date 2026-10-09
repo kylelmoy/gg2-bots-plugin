@@ -1,7 +1,5 @@
-// botTargetingAttentionRange(player): BotTargeting.AttentionRange - how far
-// this bot is looking for something to shoot right now: its class range,
-// widened to BOT_RETALIATE_RANGE while something is shooting at it. It widens
-// the search and the keep test and nothing else.
+// botTargetingAttentionRange(player): BotTargeting.AttentionRange - class
+// range, widened to BOT_RETALIATE_RANGE while under fire.
 var p, range, hit;
 p = argument0;
 range = botTargetingClassRange(p.class);

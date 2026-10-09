@@ -1,10 +1,7 @@
-// botCombatPerceive(player): BotCombat.Perceive - refreshes the snapshot of
-// where the target is and how fast it is going, every botSkillPerceiveTicks,
-// and at once on a change of subject - but only while the target is visible
-// (botCombatVisible): a bot does not learn where somebody went behind a wall.
-// "Change of subject" is the C#'s `AimSubject == Target`, a BotTarget record
-// compared by VALUE (kind, slot, x, y, visible), ported as such: a target that
-// has moved since the snapshot counts as a new subject.
+// botCombatPerceive(player): BotCombat.Perceive - refreshes the target
+// position/velocity snapshot every botSkillPerceiveTicks, or at once on a new
+// subject; only while visible. Subject compared by value (kind, slot, x, y,
+// visible), as the C# record.
 var p, tick, same, c;
 p = argument0;
 tick = global.botTick;
@@ -27,7 +24,7 @@ p.botCombatAimSubjectVisible = p.botCombatTargetVisible;
 p.botCombatSeeX = p.botCombatTargetX;
 p.botCombatSeeY = p.botCombatTargetY;
 
-// A sentry and a generator do not move.
+// Buildings do not move.
 p.botCombatSeeVx = 0;
 p.botCombatSeeVy = 0;
 if (p.botCombatTargetKind == BOT_TARGET_KIND_CHARACTER)

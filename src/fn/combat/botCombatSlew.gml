@@ -1,7 +1,6 @@
-// botCombatSlew(player): BotCombat.Slew - turns botCombatAimDir towards
-// botCombatAimWant at botSkillTurnRate degrees a tick, SNAPPING when within
-// one tick's turn (otherwise the aim oscillates and the settle gate never
-// opens), then normalises into [0, 360). botTargetingAngleDelta is inlined.
+// botCombatSlew(player): BotCombat.Slew - turns botCombatAimDir toward
+// botCombatAimWant at botSkillTurnRate deg/tick, snapping within one tick;
+// result in [0, 360).
 var p, e, delta, a;
 p = argument0;
 e = p.botCombatAimWant - p.botCombatAimDir + 180;

@@ -1,9 +1,6 @@
-// botReflexTravelledFrom(projectile): BotReflex.TravelledFrom - how far this
-// projectile has flown from whoever fired it.
-// A Rocket carries the number: move_all_bullets refreshes lastknownx/y from
-// its owner every step (and they freeze where a dead shooter fell), so it is
-// measured to those. A Flare or Mine is measured to its ownerPlayer's live
-// character; one whose owner has gone or died has travelled far enough.
+// botReflexTravelledFrom(projectile): BotReflex.TravelledFrom - distance flown
+// from the shooter: a Rocket's lastknownx/y, else the owner's live character
+// (huge if none).
 var pr, own, c;
 pr = argument0;
 if (pr.object_index == Rocket)

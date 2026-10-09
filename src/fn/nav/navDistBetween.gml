@@ -1,11 +1,7 @@
-// navDistBetween(table, from, goal): NavDistances.Between - the cheapest cost
-// from `from` to `goal` on that table's graph, or NAV_INF when there is no
-// route at all (or either node, or the table, is out of range). Test for "no
-// route" with `>= NAV_INF`.
-//
-// The table is a handle from navDistFor. The file stores floor(cost * 16), so
-// this is up to 1/16 below the C#'s float: still never above the true
-// remaining cost, which is what a heuristic needs (docs/NAVFILES.md).
+// navDistBetween(table, from, goal): NavDistances.Between - cheapest cost from
+// `from` to `goal`; NAV_INF (test `>= NAV_INF`) if no route or out of range.
+// table from navDistFor. Stored as floor(cost * 16): up to 1/16 below the C#,
+// still admissible.
 var t, from, goal, n, raw;
 t = argument0;
 from = argument1;

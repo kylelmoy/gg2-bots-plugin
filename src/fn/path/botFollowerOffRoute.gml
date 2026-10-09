@@ -1,14 +1,7 @@
 // botFollowerOffRoute(player, x, y, team, hasIntel, setupGatesClosed,
 //                     canDoubleJump, canRocketJump, canStickyJump)
-// PathFollower.OffRoute: landed somewhere the route does not go - take the edge
-// away if it has failed twice, and re-plan from where the bot actually is.
-// Returns no keys.
-//
-// Not on the first miss (BotPathState.FailCount: many real edges are marginal
-// and flown stochastically). ONLY a real edge counts - a deliberate departure
-// of the C# from the reference: the (-1,-1) "no edge running" sentinel used to
-// reset the count for the real edge and spend the ban on a pair BlacklistEdge
-// discards, so a carrier looped two surfaces for 26,000 ticks.
+// PathFollower.OffRoute: blacklists the edge on its second failure and re-plans
+// from (x, y). Returns 0. Only a real edge counts; (-1,-1) leaves the count.
 var p, px, py;
 p = argument0;
 px = argument1;
@@ -31,9 +24,7 @@ if (p.botPathEdgeFrom >= 0 and p.botPathEdgeTo >= 0)
     }
 }
 
-// Banned by the REMEMBERED pair, not the current one: the count can survive a
-// sentinel miss, so the current pair may be (-1,-1) when the second real miss
-// lands.
+// Ban the remembered pair; the current one may be (-1,-1).
 if (p.botPathFailCount >= 2 and p.botPathFailFrom >= 0 and p.botPathFailTo >= 0)
 {
     botPathBlacklistEdge(p, p.botPathFailFrom, p.botPathFailTo);

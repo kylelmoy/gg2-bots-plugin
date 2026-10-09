@@ -1,18 +1,9 @@
 // botGoalSpotReach(fromNode, query): BotGoalSpot.Reach - fills
-// global.botGoalSpotReachGrid (ds_grid 1 x nodes, 1 = reachable) with every node
-// routable from `fromNode` under `query` (the NavQuery packed as BOT_SPOT_Q_*
-// bits), unless it already holds that answer.
-//
-// Cached on (from, query, map generation) and SHARED by every bot, where the C#
-// caches per bot: the answer depends on nothing else, so sharing only adds hits.
-// The query changes with live state (a carrier's gates, a soldier's launcher
-// going cold) and a stale answer would admit a spot the planner then refuses.
-//
-// The edge test is NavGraph.EdgeRoutable, INLINED: gate passability as
-// charSetSolids decides it (NavGraph.GatePassable) and the three class arcs
-// refused by default. It runs once per edge of a BFS over the whole graph, which
-// a function call per edge would roughly double. It must agree with nav's
-// navGraphEdgeRoutable exactly - see docs/departures/objective.md.
+// global.botGoalSpotReachGrid (1 x nodes, 1 = reachable) with nodes routable
+// from fromNode under query (BOT_SPOT_Q_* bits).
+// Departure: one cache shared by all bots, keyed on (from, query, map gen, node
+// count). Inlines NavGraph.EdgeRoutable; must match navGraphEdgeRoutable
+// (docs/departures/objective.md).
 var from, query, gen, count, reach, queue, isBlue, hasIntel, setupClosed, canDj, canRj, canSj;
 var n, e, last, k, toNode, gate, etype, pass;
 from = argument0;

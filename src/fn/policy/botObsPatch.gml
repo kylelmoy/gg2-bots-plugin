@@ -1,14 +1,7 @@
-// botObsPatch(char): ObservationWriter.WriteGeometry's walkmask patch, rows
-// 140..203: 8 x 8 world pixels round(x) + (column - 4) * 16, round(y) +
-// (row - 4) * 16, row-major, 1 where the walkmask cell under the pixel is
-// solid (CollisionMapO, precise; see botObsRays).
-//
-// Exact, and cheaper than 64 probes: one collision_rectangle around the whole
-// patch, then one per row band, settle the empty ones natively, and only a row
-// with terrain in it is probed point by point. The rectangles are a pixel
-// wider than the sample points on every side, so whatever GM8 does at a
-// rectangle's edge, a solid sample point is always inside one: they can only
-// over-report, which costs probes, never a wrong cell.
+// botObsPatch(char): ObservationWriter.WriteGeometry's walkmask patch - rows
+// 140..203, 8 x 8 samples 16 px apart, row-major, 1 where solid.
+// Rectangles prune empty patch/rows first; padded 1 px so they only
+// over-report.
 var ch, g, rx, ry, x0, x1, y0, y1, row, col, px, py;
 ch = argument0;
 g = global.botObsGrid;

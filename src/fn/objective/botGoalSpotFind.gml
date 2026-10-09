@@ -1,36 +1,19 @@
-// botGoalSpotFind(fromX, fromY, targetX, targetY, minDistance, maxDistance, los,
+// botGoalSpotFind(fromX, fromY, targetX, targetY, minDistance, maxDistance,
+// los,
 //     highBonus, avoidRadius, avoidNode, skip, stickyNode, fromNode, query)
-// BotGoalSpot.Find (botGoalSpot): the nav node to stand on in order to DO
-// something to a point - shoot it, overlook it, cover its approach - rather than
-// to be on it. Returns BotSpot: Node in global.botRet (-1 if nothing qualified)
-// and the node's stand position in global.botRetX / global.botRetY - the anchor
-// itself on a miss, so a caller that ignores Node still gets a usable point.
-// global.botGoalSpotTries is how many sightline tests it paid for (BotGoalSpot.Tries).
-//
-// Arguments are the C#'s, minus the collision world and filter (the sightline is
-// the game's own collision_line_bulletblocking, which is CollisionFilter.ForBullet)
-// and with the NavQuery packed into `query` (BOT_SPOT_Q_* bits, or -1 for C#
-// `reachableFor: null`), because 20 arguments do not fit GML's 16. `los` is
-// BOT_LOS_ANY / NEED / AVOID. avoidRadius 0, avoidNode -1, skip 0, stickyNode -1,
-// fromNode -1, query -1 are the C# defaults.
-//
-// The shape is botFindTarget's: rank every node in the band cheaply, then pay
-// for the sightline only on the best, best-first, stopping at the first that
-// passes, and at most BOT_SPOT_TRIES failed lines. Rank, in world pixels:
-//     distance from the bot  +  |distance to target - middle of band|
-//     -  highBonus * height above the target
-// (negative is fine and not clamped). Candidates are ordered with a ds_priority;
-// BOT_SPOT_TIE_EPS * node breaks ties by node index as the C#'s sort does.
-//
-// Reachability is the caller's only when `query` is -1: with a query and a
-// fromNode, only nodes the bot's class can route to under it are candidates
-// (botGoalSpotReach). Without one, a spot that resolves is not a route that
-// exists - BotObjective's caller bans spots that never produce a path.
-//
-// Speed: the band is a distance from the anchor, so only mask rows whose stand
-// height lies within maxDistance of it can qualify, and the nodes are stored
-// sorted by row - the ranking pass walks only those rows (global.botNavRowStart)
-// instead of the whole graph. Same candidates, same order.
+// BotGoalSpot.Find (botGoalSpot): the nav node to stand on to
+// shoot/overlook/cover a point. Returns node in global.botRet (-1 if none);
+// stand position in global.botRetX/Y (the anchor on a miss).
+// global.botGoalSpotTries = sightline tests paid (BotGoalSpot.Tries).
+// Departure: no collision world/filter args (uses
+// collision_line_bulletblocking); NavQuery packed into `query` (BOT_SPOT_Q_*
+// bits, -1 = null) to fit GML's 16 args. los: BOT_LOS_ANY/NEED/AVOID. Defaults:
+// avoidRadius 0, avoidNode -1, skip 0, stickyNode -1, fromNode -1, query -1.
+// Rank (px): dist from bot + |dist to target - band middle| - highBonus *
+// height above target; ties by node index (BOT_SPOT_TIE_EPS). Sightline tested
+// best-first, at most BOT_SPOT_TRIES fails. With query and fromNode, only nodes
+// reachable under it qualify (botGoalSpotReach). Only rows within maxDistance
+// of the anchor are scanned (global.botNavRowStart).
 var fromX, fromY, tx, ty, minD, maxD, los, highBonus, avoidRadius, avoidNode, skip, stickyNode, fromNode, query;
 var count, filtered, middle, tcol, n, row, x0, x1, col, sx, sy, toTarget, ok, wrong, rank, tries;
 var queue, passed, firstNode, firstX, firstY, result, resX, resY, rowLow, rowHigh, r, budget, held, rows;
@@ -58,7 +41,6 @@ if (!global.botNavReady)
 
 count = global.botNavNodeCount;
 
-// A spot the bot's own class cannot walk to is not a spot.
 filtered = (fromNode >= 0 and fromNode < count and query >= 0);
 if (filtered)
     botGoalSpotReach(fromNode, query);
@@ -73,11 +55,7 @@ middle = (minD + maxD) / 2;
 tcol = floor(tx / NAV_CELL_SIZE) - (NAV_BOX_W div 2);
 tries = 0;
 
-// --- keep the node already chosen for this anchor --------------------------
-// The rank's first term is the distance from the BOT, which is walking a graph
-// route rather than a straight line, so re-deciding every objective tick makes
-// the goal flip between two candidates for ever. Held while it still qualifies;
-// the band test is what lets go of it when the objective moves.
+// Keep stickyNode while it still qualifies (stops goal flip-flopping).
 if (stickyNode >= 0 and stickyNode != avoidNode and stickyNode < count)
 {
     ok = true;
@@ -114,7 +92,7 @@ if (stickyNode >= 0 and stickyNode != avoidNode and stickyNode < count)
     }
 }
 
-// --- rank the band ---------------------------------------------------------
+// Rank the band.
 queue = ds_priority_create();
 
 rows = ds_grid_height(global.botNavRowStart);
@@ -142,8 +120,7 @@ if (n >= 0)
         sy = (row + NAV_BOX_H) * NAV_CELL_SIZE - BOT_OBJ_FEET_OFFSET;
         toTarget = point_distance(sx, sy, tx, ty);
 
-        // avoidNode is refused BEFORE ranking: the bot's own node scores zero on
-        // "walk less" and would win by construction.
+        // avoidNode refused before ranking (it would win on distance zero).
         ok = (toTarget >= minD and toTarget <= maxD and n != avoidNode);
         if (ok and filtered)
             ok = (ds_grid_get(global.botGoalSpotReachGrid, 0, n) != 0);
@@ -160,7 +137,7 @@ if (n >= 0)
     }
 }
 
-// --- best-first, paying for the sightline only here ------------------------
+// Best-first; sightline paid only here.
 passed = 0;
 firstNode = -1;
 firstX = 0;
@@ -214,10 +191,7 @@ while (!ds_priority_empty(queue))
 }
 ds_priority_clear(queue);
 
-// The skip WRAPS rather than walking off the end: a caller cycling a fixed
-// number of re-post candidates against a band that offers fewer gets the
-// first qualifying one - the answer a fresh caller would have had - instead of
-// "nothing anywhere", which parks it on the node it is standing on.
+// skip wraps to the first qualifying node.
 if (result < 0 and firstNode >= 0)
 {
     result = firstNode;
@@ -225,10 +199,8 @@ if (result < 0 and firstNode >= 0)
     resY = firstY;
 }
 
-// --- nothing reachable in the band: widen it outward ------------------------
-// The reachable node nearest the band's middle that still keeps the minimum
-// distance and still has the sightline asked for (dropping the sightline too
-// was measured worse). Nothing qualifying at all is a miss.
+// Nothing in the band: nearest reachable node to the band middle, keeping minD
+// and los.
 if (result < 0 and filtered)
 {
     for (n = 0; n < count; n += 1)

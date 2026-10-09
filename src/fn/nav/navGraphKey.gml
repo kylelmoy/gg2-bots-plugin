@@ -1,13 +1,6 @@
-// navGraphKey(map, area, md5): NavCache.Key - the filename stem for a map and
-// area's graph files (docs/NAVFILES.md, "The key").
-//
-// The map NAME is the identity: serverGotoMap leaves currentMapMD5 empty for
-// every internal map, so keying on the MD5 would give every shipped map one
-// entry. Every character outside [A-Za-z0-9_-] becomes an underscore.
-//
-// Overload: the C# has no md5 argument (it serves built-in maps only). Here a
-// non-empty md5 (global.currentMapMD5) goes between the name and the area - `<name>_<md5>_a<area>` -
-// so two different custom maps under one name never share a graph.
+// navGraphKey(map, area, md5): NavCache.Key - graph file stem
+// `<name>[_<md5>]_a<area>`; chars outside [A-Za-z0-9_-] become `_`.
+// Departure: the md5 argument (non-empty for custom maps) is not in the C#.
 var name, hash, safe, i, c, code;
 name = argument0;
 hash = argument2;

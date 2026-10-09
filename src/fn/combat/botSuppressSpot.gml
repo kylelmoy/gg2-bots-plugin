@@ -1,12 +1,7 @@
-// botSuppressSpot(char, lastX, lastY, foeTeam): BotSuppress.Spot -
-// botSuppressSpot.gml. Where to keep shooting when a target is held but cannot
-// be seen: the first node on the routes out of where they were last seen that
-// this bot has a bullet line to. A BOUNDED BREADTH-FIRST walk (not an A* - that
-// was measured too slow): at most BOT_SUPPRESS_HOPS nodes dequeued, a frontier
-// of BOT_SUPPRESS_FRONTIER, never the node they were seen on (behind cover by
-// construction). Gates are the ENEMY's (foeTeam), hasIntel and setup gates
-// false. Returns a nav node or BOT_SUPPRESS_NO_SPOT.
-// The C#'s graph argument is global.botNavReady and the nav grids.
+// botSuppressSpot(char, lastX, lastY, foeTeam): BotSuppress.Spot - first node
+// out from the last-seen spot that this bot has a bullet line to, or
+// BOT_SUPPRESS_NO_SPOT. Bounded BFS (BOT_SUPPRESS_HOPS, BOT_SUPPRESS_FRONTIER),
+// skipping the source node; gates as foeTeam, no intel, no setup.
 var me, lastX, lastY, foeTeam, source, q, seen, head, hops, node, nx, ny, e0, en, e, to, g, ok, best;
 me = argument0;
 lastX = argument1;
@@ -15,7 +10,7 @@ foeTeam = argument3;
 if (!global.botNavReady)
     return BOT_SUPPRESS_NO_SPOT;
 
-// Snapped DOWNWARD: a position in mid-air belongs to the surface under it.
+// Snaps downward.
 source = navGraphSnapObjective(lastX, lastY);
 if (source < 0)
     return BOT_SUPPRESS_NO_SPOT;

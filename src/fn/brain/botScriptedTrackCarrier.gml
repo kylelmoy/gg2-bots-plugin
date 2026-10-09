@@ -1,8 +1,7 @@
 // botScriptedTrackCarrier(player, char): ScriptedBot.TrackCarrierProgress -
-// the stuck-carrier failsafe. A carrier that makes no headway for
-// BOT_SCRIPTED_CARRIER_STUCK_TICKS, or has held the intel for
-// BOT_SCRIPTED_CARRIER_HOLD_CEILING whatever it is doing, asks once to drop it
-// (sent by botScriptedPollCommands) and re-arms from wherever the drop leaves it.
+// sets botScriptedDropIntel once when a carrier is stuck
+// BOT_SCRIPTED_CARRIER_STUCK_TICKS or holds past
+// BOT_SCRIPTED_CARRIER_HOLD_CEILING, then re-arms.
 var p, char;
 p = argument0;
 char = argument1;
@@ -18,7 +17,7 @@ if (!char.intel)
 if (p.botScriptedCarryingSince < 0)
     p.botScriptedCarryingSince = global.botTick;
 
-// The hard ceiling first: a bot circling a pair of surfaces is moving.
+// Ceiling first: circling counts as moving.
 if (global.botTick - p.botScriptedCarryingSince >= BOT_SCRIPTED_CARRIER_HOLD_CEILING)
 {
     p.botScriptedDropIntel = true;

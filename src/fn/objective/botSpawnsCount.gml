@@ -1,6 +1,6 @@
-// botSpawnsCount(team, group): SpawnPoints.Count - how many spawn points a team
-// has in a group (0..BOT_SPAWNS_GROUP_COUNT-1). 0 before botSpawnsLoad has run.
-// Anything that is not TEAM_RED reads blue, as SpawnPoints.Groups does.
+// botSpawnsCount(team, group): SpawnPoints.Count - spawn points a team has in a
+// group (0..BOT_SPAWNS_GROUP_COUNT-1); 0 before botSpawnsLoad. Non-red reads as
+// blue.
 var tm, g, i, n, c;
 tm = argument0;
 g = argument1;

@@ -1,7 +1,5 @@
-// botScriptedSetMap(player): ScriptedBot.SetMap - a new graph. Everything indexed
-// by node or edge belongs to the old graph and goes: the route and its
-// occupancy, the goal, the blacklist (botFollowerSetMap), the objective, and
-// every re-post and spot-ban counter.
+// botScriptedSetMap(player): ScriptedBot.SetMap - drop all graph-indexed state:
+// route, occupancy, goal, blacklist, objective, re-post and spot-ban counters.
 var p;
 p = argument0;
 botOccupancyRemove(p);

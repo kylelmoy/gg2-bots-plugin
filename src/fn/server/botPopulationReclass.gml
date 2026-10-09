@@ -1,7 +1,5 @@
-// botPopulationReclass(): BotPopulationService.Reclass. A bot that has just
-// died, or whose class is over its limit, picks again while it waits to
-// respawn - so a team's mix keeps moving rather than freezing at whatever the
-// first draw was - and is renamed to match.
+// botPopulationReclass(): BotPopulationService.Reclass - a dead bot that just
+// died or is over its class limit picks a new class and is renamed to match.
 var alive, died, over, n, c, playerId, nm;
 with (Player)
 {

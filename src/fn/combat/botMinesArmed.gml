@@ -1,12 +1,7 @@
-// botMinesArmed(player): BotMines.Armed - botMinesArmed.gml. Has any mine this
-// bot has out (Mine.ownerPlayer == player) got an enemy inside the radius that
-// actually hurts - the moment SPECIAL is worth pressing, since the Minegun
-// detonates every mine at once.
-//   a character  centre to centre <= BOT_MINE_TRIGGER, and only one this
-//                demoman can see (botVisibilityCanSee, inlined)
-//   a sentry     distance_to_object (box to box) < BOT_MINE_TRIGGER
-//   a generator  the same, either generator, the team test picks the enemy's
-// Teams are the CHARACTER's (the mines belong to the body that lobbed them).
+// botMinesArmed(player): BotMines.Armed - does any of this bot's mines have an
+// enemy in range: a visible character (centre <= BOT_MINE_TRIGGER,
+// botVisibilityCanSee inlined) or a sentry/generator (distance_to_object <
+// BOT_MINE_TRIGGER). Teams are the character's.
 var p, me, myTeam, mx, mxs, armed, mineId, vis;
 p = argument0;
 me = p.object;

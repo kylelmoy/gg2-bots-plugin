@@ -1,12 +1,7 @@
 // botPolicyDecide(player, char, tier): PolicyController.Decide - observe, run
-// the network, hold the six heads as the bot's action
-// (player.botPolicyActionHorizontal, ...Jump, ...Down, ...Fire, ...AimDelta,
-// ...Zoom).
-//
-// Also prices the decision for the budget: the wall time of this call
-// (current_time is 1-16 ms coarse, so one sample is usually 0 or a whole
-// tick of the clock, but its expectation is the true cost) moves the tier's
-// running estimate global.botPolicyNetCost[tier] by BOT_POLICY_COST_EMA.
+// the net, store the six heads in player.botPolicyAction*.
+// Updates the EMA cost global.botPolicyNetCost[tier] (us) from wall time;
+// current_time is coarse but unbiased on average.
 var pl, ch, tier, t0, spent;
 pl = argument0;
 ch = argument1;

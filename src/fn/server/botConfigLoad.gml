@@ -1,32 +1,26 @@
-// botConfigLoad(): read [Bots] and [BotClasslimits] from gg2.ini.
-//
-// The keys and their meaning are gg2-server's (docs/CONFIG.md there), so one
-// gg2.ini section configures bots on either server. Two defaults differ, and
-// both because installing this plugin is itself the request for bots:
-// Enabled is 1, and the class limits are the ones gg2-server's own deployment
-// ships with (deploy/config/common.ini) rather than its library default.
+// botConfigLoad(): read [Bots] and [BotClasslimits] from gg2.ini (the C# server.s
+// keys). Defaults differ: Enabled=1; class limits from the C# server.s
+// deploy/config/common.ini.
 ini_open("gg2.ini");
 global.botEnabled = ini_read_real("Bots", "Enabled", 1);
 global.botFillToPlayers = ini_read_real("Bots", "FillToPlayers", 8);
 global.botMaxBots = ini_read_real("Bots", "MaxBots", 8);
 global.botMinHumans = ini_read_real("Bots", "MinHumans", 1);
 global.botDifficulty = max(1, min(5, ini_read_real("Bots", "Difficulty", 5)));
-// Windows' ini reader trims spaces off the value AND off the default, so the
-// default's space is put back here; a prefix ending in a space can be written
-// in quotes ("[BOT] "), which the reader strips.
+// Windows' ini reader trims the default, so "~" stands in; quote a value to
+// keep a trailing space.
 global.botNamePrefix = ini_read_string("Bots", "NamePrefix", "~");
 if (global.botNamePrefix == "~")
     global.botNamePrefix = "[BOT] ";
-// "scripted" or "policy": whether the learned policy takes the wheel in a fight.
+// "scripted" or "policy" (policy takes over in fights).
 global.botMode = string_lower(ini_read_string("Bots", "Mode", "policy"));
-// Whether a bot hands its wheel to the policy against other bots too, or only
-// against people (gg2-server's --bot-engages-bots; HumansOnly is the default
-// there for a live server, and the reason is cost, which matters more here).
+// Policy handover against bots too, or humans only (the C# server.s
+// --bot-engages-bots).
 global.botEngagesBots = ini_read_real("Bots", "EngagesBots", 0);
 global.botHandoverBubbles = ini_read_real("Bots", "HandoverBubbles", 0);
 global.botOccupancyOn = ini_read_real("Bots", "Occupancy", 1);
 global.botNavDistancesOn = ini_read_real("Bots", "NavDistances", 1);
-// Whether a map with no nav graph gets one from the generator.
+// Generate a nav graph for maps without one.
 global.botNavGenerate = ini_read_real("Bots", "NavGenerate", 1);
 
 global.botClassName[CLASS_SCOUT] = "Scout";

@@ -1,6 +1,5 @@
 // botArbiterAdmitted(cost): DecisionQuotaArbiter.Admitted - charge one
-// decision that was actually taken, in microseconds, to this tick's budget.
-// Per DECISION, not per tick driven: the held ticks of a decision are free.
+// decision taken (us) to this tick's budget. Held ticks are free.
 if (global.botArbiterTick != global.botTick)
 {
     global.botArbiterTick = global.botTick;

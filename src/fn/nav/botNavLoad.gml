@@ -1,12 +1,6 @@
-// botNavLoad(): install the graph for global.botNavKey from global.botNavDir,
-// and its distance tables - BotPopulationService.MapChanged's NavCache.TryLoad
-// and LoadDistances. Returns whether a graph is now installed
-// (global.botNavReady). Called by botNavMapCheck only.
-//
-// The tables are kept across a reload when the key and the graph's size are
-// unchanged (LoadDistances' _distancesKey): the room reloads every round, a
-// .dist is several MB, and one map+area yields one graph. A key whose .dist
-// was absent or refused stays without one until the key or size changes.
+// botNavLoad(): install the graph and distance tables for global.botNavKey -
+// MapChanged's NavCache.TryLoad + LoadDistances. Returns global.botNavReady.
+// Tables are kept while key and graph size are unchanged.
 var key, ok, sig;
 key = global.botNavKey;
 navGraphFree();
@@ -23,8 +17,7 @@ if (!global.botNavDistancesOn)
 }
 else if (global.navDistLoadedKey != sig)
 {
-    // navDistLoad frees the old tables first, and leaves none on a refusal:
-    // the search then uses the straight-line heuristic.
+    // On refusal no tables: search uses the straight-line heuristic.
     navDistLoad(global.botNavDir + key + ".dist");
     global.navDistLoadedKey = sig;
 }
