@@ -43,7 +43,9 @@ the C# server.
 ## Settings
 
 All in the game's own `gg2.ini`, under the same keys the C# server reads, so one
-config section serves either server. Every key is optional.
+config section serves either server. Every key is optional. The Bots tab of
+the Host Game menu edits the everyday ones (`Enabled` to `Mode`, `EngagesBots`
+and `NavGenerate`).
 
 | `[Bots]` | Default | |
 |---|---|---|

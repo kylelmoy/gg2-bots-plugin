@@ -14,8 +14,8 @@
 //    error dialog the first time the event runs, so nothing is installed unless
 //    this passes.
 // 3. dist/Plugins/ is assembled: bots.gml (the bootstrap the game's loader
-//    runs) and bots/ (the code, the manifest, nav data, policy weights and the
-//    nav generator).
+//    runs) and bots/ (the code, the manifest, the host menu tab, nav data,
+//    policy weights and the nav generator).
 // 4. dist/Plugins/ is copied over <game>/Plugins/. --zip also writes
 //    dist/gg2-bots.zip for release.
 //=============================================================================
@@ -181,7 +181,7 @@ function compile({ stubMissing = false } = {}) {
 }
 
 function lint() {
-  const r = spawnSync(process.execPath, [LINT, path.join(BUILD, 'code'), path.join(SRC, 'bots.gml')], { encoding: 'utf8' });
+  const r = spawnSync(process.execPath, [LINT, path.join(BUILD, 'code'), path.join(SRC, 'bots.gml'), path.join(SRC, 'menu.gml')], { encoding: 'utf8' });
   const out = (r.stdout || '') + (r.stderr || '');
   // Map build/code paths back to their sources for readable errors.
   const mapped = out.replace(/build[\\/]code[\\/]fn[\\/]([A-Za-z0-9_]+)\.gml/g, (m, name) => {
@@ -197,6 +197,7 @@ function assemble() {
   rmrf(out);
   fs.mkdirSync(path.join(out, 'bots'), { recursive: true });
   fs.copyFileSync(path.join(SRC, 'bots.gml'), path.join(out, 'bots.gml'));
+  fs.copyFileSync(path.join(SRC, 'menu.gml'), path.join(out, 'bots', 'menu.gml'));
   copyDir(path.join(BUILD, 'code'), path.join(out, 'bots', 'code'));
   // Static data shipped beside the code: policy weights, nav graphs, the
   // generator. Each is produced by its own tool into build/ or data/.

@@ -1,5 +1,5 @@
-// botConfigLoad(): read [Bots] and [BotClasslimits] from gg2.ini (the C# server.s
-// keys). Defaults differ: Enabled=1; class limits from the C# server.s
+// botConfigLoad(): read [Bots] and [BotClasslimits] from gg2.ini (the C# server's
+// keys). Defaults differ: Enabled=1; class limits from the C# server's
 // deploy/config/common.ini.
 ini_open("gg2.ini");
 global.botEnabled = ini_read_real("Bots", "Enabled", 1);
@@ -14,7 +14,7 @@ if (global.botNamePrefix == "~")
     global.botNamePrefix = "[BOT] ";
 // "scripted" or "policy" (policy takes over in fights).
 global.botMode = string_lower(ini_read_string("Bots", "Mode", "policy"));
-// Policy handover against bots too, or humans only (the C# server.s
+// Policy handover against bots too, or humans only (the C# server's
 // --bot-engages-bots).
 global.botEngagesBots = ini_read_real("Bots", "EngagesBots", 0);
 global.botHandoverBubbles = ini_read_real("Bots", "HandoverBubbles", 0);

@@ -1,5 +1,6 @@
 // gg2-bots: server-side bots for Gang Garrison 2, as a local plugin. Runs on
-// every client and host, so it only hooks GameServer's End Step; the bot layer
+// every client and host, so it only adds the host menu's Bots tab and hooks
+// GameServer's End Step; the bot layer
 // (bots/code/manifest.txt) is compiled and started on hosting. Not transpiled:
 // calls transpiled code only through its two entry points.
 
@@ -68,6 +69,30 @@ global.botLoad = '
     global.botLoaded = true;
     return true;
 ';
+
+// The "Bots" tab of the host options menu, a MenuController like the stock
+// tabs; its Create is bots/menu.gml. The stock tabs' Creates get a link to it.
+global.botMenuController = object_add();
+object_set_parent(global.botMenuController, MenuController);
+object_event_add(global.botMenuController, ev_create, 0, execute_string(global.botReadFile, global.botDir + "menu.gml"));
+object_event_add(global.botMenuController, ev_step, ev_step_normal, '
+    if (!instance_exists(HostWarningsController))
+        instance_create(0, 0, HostWarningsController);
+    event_inherited();
+');
+object_event_add(global.botMenuController, ev_destroy, 0, '
+    with (HostWarningsController)
+        instance_destroy();
+');
+object_event_add(HostOptionsController, ev_create, 0, '
+    menu_addtablink("Bots", "instance_create(x,y,global.botMenuController); instance_destroy();");
+');
+object_event_add(AdvHostOptionsController, ev_create, 0, '
+    menu_addtablink("Bots", "instance_create(x,y,global.botMenuController); instance_destroy();");
+');
+object_event_add(ClasslimitsMenuController, ev_create, 0, '
+    menu_addtablink("Bots", "instance_create(x,y,global.botMenuController); instance_destroy();");
+');
 
 // Start on each GameServer's first End Step, not Create: Create ends in
 // room_goto, and GM8 skips the rest of an event after room_goto. botStarted is
