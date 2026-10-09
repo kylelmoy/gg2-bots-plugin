@@ -9,7 +9,7 @@
 // 1. Every src/fn/**/<name>.gml is a function and every
 //    src/hooks/<Object>/<event>.gml an event appended to a game object.
 //    botc.js rewrites both (see its header for the rules) into build/code/.
-// 2. build/code is linted with gg2-agent's gml-lint.js against the game's own
+// 2. build/code is linted with the agent tools' gml-lint.js against the game's own
 //    tree. A compile error in code attached with object_event_add is a FATAL
 //    error dialog the first time the event runs, so nothing is installed unless
 //    this passes.

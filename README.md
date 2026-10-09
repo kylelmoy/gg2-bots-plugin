@@ -2,7 +2,7 @@
 
 Bots for the original Gang Garrison 2 (the Game Maker 8 game), as a plugin.
 
-These are [gg2-server](../gg2-server)'s bots - the scripted bot and the
+These are the bots of a C# Gang Garrison 2 server - the scripted bot and the
 learned policy that takes the wheel in a fight - re-expressed in GML so that
 anyone who hosts the original game can play with them. Only the host installs
 anything: bots are ordinary players to everybody who connects, and a stock
@@ -22,7 +22,7 @@ program, like the game.
 
 ## What they do
 
-Everything gg2-server's bots do, in every mode the game has (CTF, control
+Everything those bots do, in every mode the game has (CTF, control
 points, attack/defend, king of the hill, dual KOTH, generator, arena, team
 deathmatch) and on custom maps:
 
@@ -34,15 +34,15 @@ deathmatch) and on custom maps:
 - pick targets the way a sentry does, lead and arc their shots, dodge rockets,
   airblast, detonate stickies, back off from point-blank range;
 - and, for scout, soldier, demoman, heavy and pyro within 150 px of a person,
-  hand the keys to gg2-server's trained policy network, the hybrid that beat
+  hand the keys to a trained policy network, the hybrid that beat
   the all-scripted bot there.
 
 Difficulty 1-5 sets reaction time, aim settling, tracking and error, as in
-gg2-server.
+the C# server.
 
 ## Settings
 
-All in the game's own `gg2.ini`, under the same keys gg2-server reads, so one
+All in the game's own `gg2.ini`, under the same keys the C# server reads, so one
 config section serves either server. Every key is optional.
 
 | `[Bots]` | Default | |
@@ -56,7 +56,7 @@ config section serves either server. Every key is optional.
 | `Mode` | `policy` | `scripted` never hands the wheel to the policy |
 | `EngagesBots` | 0 | 1: the policy also takes over against other bots, not only against people (costs CPU for nobody's benefit) |
 | `Arbiter` | 10000 | microseconds of policy decisions allowed per tick; past it, bots stay scripted that tick |
-| `ClassPolicy` | | gg2-server's per-class override, e.g. `Pyro=scripted` |
+| `ClassPolicy` | | per-class policy override, e.g. `Pyro=scripted` |
 | `HandoverBubbles` | 0 | a bot shows the z1/z2 chat bubble when the policy takes or returns the wheel (debugging) |
 | `Occupancy` | 1 | team-mates spread over different routes |
 | `NavDistances` | 1 | the precomputed route tables (an exact A* heuristic) |
@@ -81,7 +81,7 @@ anything here: GML is interpreted.
 
 ## How it works
 
-`docs/PORTING.md` is the full story. In short:
+In short:
 
 - **A bot is a real client of its own server.** It connects over loopback and
   joins through the ordinary handshake, exactly as the game connects the
@@ -92,16 +92,15 @@ anything here: GML is interpreted.
 - **A plugin cannot define scripts**, so the source is compiled by
   `tools/botc.js`: each function becomes an event of its own object, compiled
   once when hosting starts and called with `event_perform_object`.
-- **The C# is the specification.** Each module is a port of gg2-server's
-  `GG2.Bots`, read against the game's own objects; where it differs, the
-  module's `docs/departures/` file says why.
-- **Navigation data comes from gg2-server's own generator**, `gg2-navgen.exe`
-  (`docs/NAVFILES.md`), built from a gg2-server worktree.
+- **The C# is the specification.** Each module is a port of the C# server's
+  `GG2.Bots`, read against the game's own objects.
+- **Navigation data comes from the C# server's own generator**,
+  `gg2-navgen.exe`, built from a checkout of that server.
 
 ## Building
 
 ```
-node tools/convert-policy.js        gg2-server's checkpoints -> build/data/policy
+node tools/convert-policy.js        the C# server's checkpoints -> build/data/policy
 node tools/navdata.js [--publish]   gg2-navgen.exe -> build/data/navgen (+ every stock map's nav data)
 node tools/build.js                 transpile, lint, install into a dev game
 node tools/build.js --zip           and write dist/gg2-bots.zip
@@ -109,5 +108,5 @@ node tools/test-botc.js             transpiler tests
 node tools/livecheck.js             drive a running gg2_session through maps
 ```
 
-Needs Node 18+, gg2-agent and Game Maker 8 (for the linter), and gg2-server
-(for the checkpoints and the generator). `CLAUDE.md` is the working guide.
+Needs Node 18+, Game Maker 8 and a GML linter (`GML_LINT`), and the C#
+server's source (for the checkpoints and the generator).

@@ -1,4 +1,4 @@
-// PlayerKeys (gg2-server GG2.Protocol/PlayerKeys.cs) - the bits of a
+// PlayerKeys (the C# GG2.Protocol/PlayerKeys.cs) - the bits of a
 // character's keyState, the same byte a client's INPUTSTATE carries.
 BOT_KEY_TAUNT 1
 BOT_KEY_DOWN 2

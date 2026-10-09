@@ -13,7 +13,7 @@ BOT_POLICY_MAX_NETS 8            // a sanity bound on checkpoints loaded
 
 // --- the decision budget (DecisionQuotaArbiter) ------------------------------
 // Microseconds of controller work per tick when [Bots] Arbiter is not set.
-// gg2-server defaults 10000 with a policy decision priced at 7 us; a GML
+// The C# defaults 10000 with a policy decision priced at 7 us; a GML
 // decision costs about a millisecond, so the same 10 ms would buy ten of them
 // a tick. 4000 is about 12% of a 33 ms tick.
 BOT_ARBITER_DEFAULT_US 10000

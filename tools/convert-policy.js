@@ -5,14 +5,14 @@
 //
 //   node tools/convert-policy.js [checkpoint.npz | dir]... [--out <dir>] [--ignore-stamp]
 //
-// With no inputs it converts every .npz in gg2-server's checkpoints/ (the
+// With no inputs it converts every .npz in the C# server's checkpoints/ (the
 // shipped bundle: tier0_combat4_s2 and tier2_pyro_rest3_s0). Output goes to
 // build/data/policy/<label>.txt, which tools/build.js copies into the plugin
 // as Plugins/bots/policy/. docs/POLICY.md describes the format; this header
 // is the short form.
 //
 // What it checks, and refuses on, is what PolicyNetwork.Load checks: at least
-// seven metadata fields, the simulation stamp (the gg2-server build whose
+// seven metadata fields, the simulation stamp (the C# server build whose
 // ObservationWriter the GML port transcribes; --ignore-stamp is the C#'s
 // ignoreSimulationStamp), action encoding 2, observation layout 2, 211
 // observation floats, head shape 3,2,2,3,15,2, layers that chain and end at
@@ -36,7 +36,7 @@
 //
 // Node standard library only. .npz is a zip of .npy files; both are parsed
 // here (stored or deflated members; little-endian f4/f8 arrays; the metadata
-// pickle exactly as gg2-server's NpyFile.ReadStrings reads it).
+// pickle exactly as the C# server's NpyFile.ReadStrings reads it).
 //=============================================================================
 
 'use strict';
@@ -49,7 +49,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_SRC = path.join(process.env.GG2_SERVER || 'D:/Code/gg2-server', 'checkpoints');
 const DEFAULT_OUT = path.join(ROOT, 'build', 'data', 'policy');
 
-// What this port was written against: gg2-server's SimulationStamp and
+// What this port was written against: the C# server's SimulationStamp and
 // ObservationWriter/ActionDecoder at the build that shipped the checkpoints.
 const EXPECTED_SIM_UUID = 'f10afbdadc795d77';
 const ACTION_ENCODING = 2;

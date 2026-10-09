@@ -1,6 +1,6 @@
 // The nav module's own constants: C# private consts and the GML-only
 // bookkeeping values the port needs. generated.txt has the NAV_*/BOT_* values
-// shared with gg2-server; nothing here duplicates one of those.
+// shared with the C#; nothing here duplicates one of those.
 
 // NavGraph.FeetOffset: how far below a character's origin its feet are. A
 // literal in the reference GML, which is why it is not in NavConstants.

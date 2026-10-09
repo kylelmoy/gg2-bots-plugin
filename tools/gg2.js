@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 //=============================================================================
-// gg2.js - call one gg2-agent MCP tool from the shell.
+// gg2.js - call one gg2 MCP tool from the shell.
 //
 //   node tools/gg2.js <tool> '<json arguments>'
 //   node tools/gg2.js gg2_evalx '{"instance":"client1","expr":"global.chatHello"}'
 //
 // For sessions that do not have the gg2 MCP server attached. Each call is its
 // own bridge client and disconnects when it exits, so do not run it while the
-// control panel or an MCP session holds the same game (gg2-agent CLAUDE.md,
+// control panel or an MCP session holds the same game (the agent tools' guide,
 // "The loop").
 //=============================================================================
 

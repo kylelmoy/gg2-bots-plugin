@@ -2,9 +2,9 @@
 //=============================================================================
 // navdata.js - put the nav generator and the shipped maps' nav files in build/.
 //
-//   node tools/navdata.js [--server <gg2-server worktree>] [--exe <gg2-navgen.exe>] [--publish]
+//   node tools/navdata.js [--server <C# server worktree>] [--exe <gg2-navgen.exe>] [--publish]
 //
-// 1. --publish first runs `dotnet publish` for gg2-navgen in the gg2-server
+// 1. --publish first runs `dotnet publish` for gg2-navgen in the C# server
 //    worktree (default D:/Code/gg2-server-botsplugin, branch bots-plugin-navgen,
 //    or GG2_SERVER_NAVGEN). Without it the last published exe is used.
 // 2. Copies the exe (default <server>/src/GG2.NavGen/bin/publish/gg2-navgen.exe)
