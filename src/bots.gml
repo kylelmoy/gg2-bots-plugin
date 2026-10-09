@@ -71,13 +71,22 @@ global.botLoad = '
 ';
 
 // The "Bots" tab of the host options menu, a MenuController like the stock
-// tabs; its Create is bots/menu.gml. The stock tabs' Creates get a link to it.
+// tabs; its Create is bots/menu.gml. The stock tabs' Creates get a link to it
+// and a smaller tab margin: four 112 px tabs from the stock 128 px margin run
+// past a 600 px window, from 72 px they end flush with the menu box (552 px).
 global.botMenuController = object_add();
 object_set_parent(global.botMenuController, MenuController);
 object_event_add(global.botMenuController, ev_create, 0, execute_string(global.botReadFile, global.botDir + "menu.gml"));
+// GM8 steps objects in index order, and this one, made at run time, comes
+// after HostWarningsController - itself a MenuController whose Step takes and
+// mouse_clear()s every click in its 340 px hit area. The stock tabs step
+// first so they never notice; here the warning box gets no hit area (Draw
+// does not use `width`, so it still shows).
 object_event_add(global.botMenuController, ev_step, ev_step_normal, '
     if (!instance_exists(HostWarningsController))
         instance_create(0, 0, HostWarningsController);
+    with (HostWarningsController)
+        width = 0;
     event_inherited();
 ');
 object_event_add(global.botMenuController, ev_destroy, 0, '
@@ -86,12 +95,15 @@ object_event_add(global.botMenuController, ev_destroy, 0, '
 ');
 object_event_add(HostOptionsController, ev_create, 0, '
     menu_addtablink("Bots", "instance_create(x,y,global.botMenuController); instance_destroy();");
+    tabmargin = 72;
 ');
 object_event_add(AdvHostOptionsController, ev_create, 0, '
     menu_addtablink("Bots", "instance_create(x,y,global.botMenuController); instance_destroy();");
+    tabmargin = 72;
 ');
 object_event_add(ClasslimitsMenuController, ev_create, 0, '
     menu_addtablink("Bots", "instance_create(x,y,global.botMenuController); instance_destroy();");
+    tabmargin = 72;
 ');
 
 // Start on each GameServer's first End Step, not Create: Create ends in

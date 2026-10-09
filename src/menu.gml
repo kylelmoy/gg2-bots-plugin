@@ -7,17 +7,14 @@ ini_open("gg2.ini");
 global.botEnabled = ini_read_real("Bots", "Enabled", 1);
 global.botFillToPlayers = ini_read_real("Bots", "FillToPlayers", 8);
 global.botMaxBots = ini_read_real("Bots", "MaxBots", 8);
-global.botMinHumans = ini_read_real("Bots", "MinHumans", 1);
 global.botDifficulty = max(1, min(5, ini_read_real("Bots", "Difficulty", 5)));
 global.botNamePrefix = ini_read_string("Bots", "NamePrefix", "~");
 if (global.botNamePrefix == "~")
     global.botNamePrefix = "[BOT] ";
-global.botMode = string_lower(ini_read_string("Bots", "Mode", "policy"));
-global.botEngagesBots = ini_read_real("Bots", "EngagesBots", 0);
-global.botNavGenerate = ini_read_real("Bots", "NavGenerate", 1);
 ini_close();
 
-menu_create(48, 172, 500, 260, 32, 40, 112, 128);
+// Tab margin 72, not the stock 128: see bots.gml.
+menu_create(48, 172, 500, 260, 32, 40, 112, 72);
 menumode = true;
 
 menu_background(512, 24, 8, 12, 4);
@@ -31,9 +28,6 @@ menu_addedit_num("Fill to players:", "global.botFillToPlayers", '
 ', 48);
 menu_addedit_num("Max bots:", "global.botMaxBots", '
     gg2_write_ini("Bots", "MaxBots", argument0);
-', 48);
-menu_addedit_num("Min humans:", "global.botMinHumans", '
-    gg2_write_ini("Bots", "MinHumans", argument0);
 ', 48);
 menu_addedit_select("Difficulty:", "global.botDifficulty", '
     gg2_write_ini("Bots", "Difficulty", argument0);
@@ -50,17 +44,6 @@ menu_addedit_text2("Name prefix:", "global.botNamePrefix", '
     prefix = string_copy(argument0, 1, 12);
     gg2_write_ini("Bots", "NamePrefix", chr(34) + prefix + chr(34));
     return prefix;
-');
-menu_addedit_select("Fighting:", "global.botMode", '
-    gg2_write_ini("Bots", "Mode", argument0);
-');
-menu_add_option("policy", "Learned policy up close");
-menu_add_option("scripted", "Scripted only");
-menu_addedit_boolean("Policy against bots:", "global.botEngagesBots", '
-    gg2_write_ini("Bots", "EngagesBots", argument0);
-');
-menu_addedit_boolean("Generate nav for new maps:", "global.botNavGenerate", '
-    gg2_write_ini("Bots", "NavGenerate", argument0);
 ');
 
 menu_addlink("Start Game", '
