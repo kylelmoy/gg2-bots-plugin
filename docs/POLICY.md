@@ -6,8 +6,9 @@ gg2-server's learned policy and the hybrid that hands the wheel to it
 role of the arbiter), as GML in `src/fn/policy/`. The C# is the spec;
 `docs/departures/policy.md` lists where this differs and why.
 
-Shipped: `tier0_combat4_s2` drives scout, soldier, demoman and heavy;
-`tier2_pyro_rest3_s0` drives pyro; sniper, spy, engineer and medic stay
+Shipped: `combat` drives scout, soldier, demoman and heavy; `pyro` drives
+pyro (converted from gg2-server's `tier0_combat4_s2` and `tier2_pyro_rest3_s0`;
+`tools/convert-policy.js` names them); sniper, spy, engineer and medic stay
 scripted (gg2-server `checkpoints/README.md`).
 
 ## API for the integrator

@@ -3,12 +3,15 @@
 // convert-policy.js - turn gg2-rl policy checkpoints (.npz) into files the
 // plugin's GML loads with ds_grid_read.
 //
-//   node tools/convert-policy.js [checkpoint.npz | dir]... [--out <dir>] [--ignore-stamp]
+//   node tools/convert-policy.js [checkpoint.npz | dir]... [--out <dir>] [--name <label>] [--ignore-stamp]
 //
 // With no inputs it converts every .npz in the C# server's checkpoints/ (the
-// shipped bundle: tier0_combat4_s2 and tier2_pyro_rest3_s0). Output goes to
-// build/data/policy/<label>.txt, which tools/build.js copies into the plugin
-// as Plugins/bots/policy/. docs/POLICY.md describes the format; this header
+// shipped bundle). Output goes to build/data/policy/<label>.txt, which
+// tools/build.js copies into the plugin as Plugins/bots/policy/. The label is
+// what the plugin calls the network ([Bots] ClassPolicy, policy.log), so a
+// shipped checkpoint gets a name for what it drives (SHIPPED_NAMES) rather
+// than its training-run name; anything else keeps its file name, or --name
+// (one input only). Labels load in name order, which is tier order. docs/POLICY.md describes the format; this header
 // is the short form.
 //
 // What it checks, and refuses on, is what PolicyNetwork.Load checks: at least
@@ -48,6 +51,13 @@ const zlib = require('zlib');
 const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_SRC = path.join(process.env.GG2_SERVER || 'D:/Code/gg2-server', 'checkpoints');
 const DEFAULT_OUT = path.join(ROOT, 'build', 'data', 'policy');
+
+// Training-run name -> shipped label. Sorted as the tiers are (the loader
+// loads in file-name order).
+const SHIPPED_NAMES = {
+  tier0_combat4_s2: 'combat', // scout, soldier, demoman, heavy
+  tier2_pyro_rest3_s0: 'pyro',
+};
 
 // What this port was written against: the C# server's SimulationStamp and
 // ObservationWriter/ActionDecoder at the build that shipped the checkpoints.
@@ -454,8 +464,10 @@ function sampleObservation(rand, cls) {
 
 // ---------------------------------------------------------------------------
 
-function convert(file, outDir, ignoreStamp) {
-  const label = path.basename(file, '.npz');
+function convert(file, outDir, ignoreStamp, name) {
+  const source = path.basename(file, '.npz');
+  const label = name || SHIPPED_NAMES[source] || source;
+  if (!/^[A-Za-z0-9_-]+$/.test(label)) throw new Error(`label '${label}' may only contain A-Z a-z 0-9 _ -`);
   const net = loadCheckpoint(file, ignoreStamp);
   const grids = layerGrids(net);
 
@@ -491,6 +503,8 @@ function convert(file, outDir, ignoreStamp) {
 
   fs.mkdirSync(outDir, { recursive: true });
   const out = path.join(outDir, `${label}.txt`);
+  // A file left under the training-run name would load as a second network.
+  if (label !== source) fs.rmSync(path.join(outDir, `${source}.txt`), { force: true });
   fs.writeFileSync(out, lines.join('\r\n') + '\r\n', 'latin1');
 
   // Read back what was written and run the GML method on it.
@@ -521,7 +535,7 @@ function convert(file, outDir, ignoreStamp) {
     if (argmaxHeads(f).join() !== argmaxHeads(d).join()) flips++;
   }
 
-  console.log(`${label}: ${net.layers.map((l) => `${l.inputs}x${l.outputs}`).join(' -> ')}, repeat ${net.repeat}, `
+  console.log(`${label}${label !== source ? ` (${source})` : ''}: ${net.layers.map((l) => `${l.inputs}x${l.outputs}`).join(' -> ')}, repeat ${net.repeat}, `
     + `stamp ${net.simUuid}${net.simUuid === EXPECTED_SIM_UUID ? ' (match)' : ' (MISMATCH, ignored)'}, drives ${net.classNames.join(',')}`);
   console.log(`  -> ${path.relative(ROOT, out)} (${fs.statSync(out).size} bytes); grid method vs dense: ${gridErr.toExponential(2)}; `
     + `float32 vs double: max logit diff ${maxDiff.toExponential(2)}, argmax differs in ${flips}/${N} sampled observations`);
@@ -531,9 +545,11 @@ function main() {
   const args = process.argv.slice(2);
   let outDir = DEFAULT_OUT;
   let ignoreStamp = false;
+  let name = null;
   const inputs = [];
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--out') outDir = path.resolve(args[++i]);
+    else if (args[i] === '--name') name = args[++i];
     else if (args[i] === '--ignore-stamp') ignoreStamp = true;
     else inputs.push(args[i]);
   }
@@ -550,10 +566,14 @@ function main() {
     console.error('convert-policy: no .npz checkpoints found');
     process.exit(1);
   }
+  if (name && files.length !== 1) {
+    console.error('convert-policy: --name takes exactly one checkpoint');
+    process.exit(2);
+  }
   let failed = 0;
   for (const f of files) {
     try {
-      convert(f, outDir, ignoreStamp);
+      convert(f, outDir, ignoreStamp, name);
     } catch (e) {
       failed++;
       console.error(`${path.basename(f)}: REFUSED: ${e.message}`);
