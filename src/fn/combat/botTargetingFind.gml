@@ -32,6 +32,8 @@ mxs = me.image_xscale;
 dealer = me.lastDamageDealer;
 source = me.lastDamageSource;
 minBand = botTargetingClassMinBand(p.class);
+// That call left its result in global.botRet; nothing found is still false.
+global.botRet = false;
 sentryObj = global.DAMAGE_SOURCE_SENTRYTURRET;
 
 if (!variable_global_exists("botTargetingQueue"))
