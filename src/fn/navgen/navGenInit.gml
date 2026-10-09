@@ -11,6 +11,11 @@ global.navGenDistOnly = false;
 // Read by navGenUnit whatever the stage, tables-only runs included.
 global.navGenNodeCount = 0;
 global.navGenEdgeCount = 0;
+// Read by the debug HUD.
+global.navGenDistKeyCount = 0;
+global.navGenDistNodes = 0;
+global.navGenDistTable = 0;
+global.navGenDistAt = 0;
 global.navGenMs = 0;
 global.navGenGraphMs = 0;
 global.navGenLongestMs = 0;

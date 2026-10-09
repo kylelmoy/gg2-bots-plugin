@@ -48,7 +48,7 @@ the C# server.
 All in the game's own `gg2.ini`, under the same keys the C# server reads, so one
 config section serves either server. Every key is optional. The Bots tab of
 the Host Game menu edits the everyday ones (`Enabled`, `FillToPlayers`,
-`MaxBots`, `Difficulty` and `NamePrefix`).
+`MaxBots`, `Difficulty`, `NamePrefix` and `Debug`).
 
 | `[Bots]` | Default | |
 |---|---|---|
@@ -63,6 +63,7 @@ the Host Game menu edits the everyday ones (`Enabled`, `FillToPlayers`,
 | `Arbiter` | 10000 | microseconds of policy decisions allowed per tick; past it, bots stay scripted that tick |
 | `ClassPolicy` | | per-class policy override, e.g. `Pyro=scripted` |
 | `HandoverBubbles` | 0 | a bot shows the z1/z2 chat bubble when the policy takes or returns the wheel (debugging) |
+| `Debug` | 0 | the host's diagnostic overlay: each bot's route, goal, target, aim-error cone, driver (scripted or policy) and difficulty knobs, plus nav and cost figures; a listen server's host sees it, nobody else |
 | `Occupancy` | 1 | team-mates spread over different routes |
 | `NavDistances` | 1 | the precomputed route tables (an exact A* heuristic) |
 | `NavGenerate` | 1 | build navigation data for maps that have none |

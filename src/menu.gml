@@ -8,6 +8,7 @@ global.botEnabled = ini_read_real("Bots", "Enabled", 1);
 global.botFillToPlayers = ini_read_real("Bots", "FillToPlayers", 8);
 global.botMaxBots = ini_read_real("Bots", "MaxBots", 8);
 global.botDifficulty = max(1, min(5, ini_read_real("Bots", "Difficulty", 5)));
+global.botDebug = ini_read_real("Bots", "Debug", 0);
 global.botNamePrefix = ini_read_string("Bots", "NamePrefix", "~");
 if (global.botNamePrefix == "~")
     global.botNamePrefix = "[BOT] ";
@@ -32,11 +33,11 @@ menu_addedit_num("Max bots:", "global.botMaxBots", '
 menu_addedit_select("Difficulty:", "global.botDifficulty", '
     gg2_write_ini("Bots", "Difficulty", argument0);
 ');
-menu_add_option(1, "1 (easy)");
-menu_add_option(2, "2");
-menu_add_option(3, "3");
-menu_add_option(4, "4");
-menu_add_option(5, "5 (hard)");
+menu_add_option(1, "Easy");
+menu_add_option(2, "Medium");
+menu_add_option(3, "Hard");
+menu_add_option(4, "Very hard");
+menu_add_option(5, "Max");
 // 12: prefix + "Engineer" within MAX_PLAYERNAME_LENGTH. Quoted, or Windows'
 // ini reader trims a trailing space.
 menu_addedit_text2("Name prefix:", "global.botNamePrefix", '
@@ -44,6 +45,10 @@ menu_addedit_text2("Name prefix:", "global.botNamePrefix", '
     prefix = string_copy(argument0, 1, 12);
     gg2_write_ini("Bots", "NamePrefix", chr(34) + prefix + chr(34));
     return prefix;
+');
+
+menu_addedit_boolean("Debug overlay:", "global.botDebug", '
+    gg2_write_ini("Bots", "Debug", argument0);
 ');
 
 menu_addlink("Start Game", '

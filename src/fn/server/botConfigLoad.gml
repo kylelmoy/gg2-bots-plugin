@@ -22,6 +22,8 @@ global.botOccupancyOn = ini_read_real("Bots", "Occupancy", 1);
 global.botNavDistancesOn = ini_read_real("Bots", "NavDistances", 1);
 // Generate a nav graph for maps without one.
 global.botNavGenerate = ini_read_real("Bots", "NavGenerate", 1);
+// The host's debug overlay (botDebugDraw).
+global.botDebug = ini_read_real("Bots", "Debug", 0);
 
 global.botClassName[CLASS_SCOUT] = "Scout";
 global.botClassName[CLASS_SOLDIER] = "Soldier";

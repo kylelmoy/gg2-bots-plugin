@@ -2,6 +2,7 @@
 // state.
 var i;
 global.botRunning = false;
+botDebugStop();
 if (!variable_global_exists("botJoining"))
     exit;
 for (i = 0; i < ds_list_size(global.botJoining); i += 1)

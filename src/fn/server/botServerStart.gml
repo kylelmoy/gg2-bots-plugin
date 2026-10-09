@@ -27,4 +27,5 @@ with (Player)
 botNavInit();
 botBrainInit();
 botStatsReset();
+botDebugStart();
 global.botRunning = true;
