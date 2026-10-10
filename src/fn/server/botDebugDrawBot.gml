@@ -50,12 +50,12 @@ if (global.botNavReady && global.botDebugPaths)
     }
 }
 
-// Target and aim.
+// Target and aim: green while the target is in sight, grey once lost.
 if (p.botCombatTargetExists && global.botDebugTargeting)
 {
     if (p.botCombatVisible)
     {
-        draw_set_color(c_red);
+        draw_set_color(make_color_rgb(60, 230, 90));
         draw_set_alpha(0.9);
     }
     else
