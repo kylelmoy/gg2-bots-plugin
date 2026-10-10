@@ -17,7 +17,7 @@ else
 
 // Route: from the bot to the node it is heading for (PathAt is the one it is
 // on), on through the rest, then the goal.
-if (global.botNavReady)
+if (global.botNavReady && global.botDebugPaths)
 {
     size = ds_list_size(p.botPathPath);
     ax = cx;

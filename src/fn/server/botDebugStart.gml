@@ -11,9 +11,10 @@ if (!variable_global_exists("botDebugObj"))
     object_event_add(global.botDebugObj, ev_step, ev_step_begin, 'event_perform_object(global.botF_botDebugStep, ev_other, ev_user0);');
 }
 // The HUD starts collapsed; its box and buttons are set by the first draw.
-// Layers: labels on, nav graph and handover radius off.
+// Layers: labels and paths on, nav graph and handover radius off.
 global.botDebugOpen = false;
 global.botDebugLabels = true;
+global.botDebugPaths = true;
 global.botDebugNav = false;
 global.botDebugHandover = false;
 global.botDebugButtonCount = 0;
