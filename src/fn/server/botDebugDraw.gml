@@ -1,8 +1,8 @@
 // botDebugDraw(): the [Bots] Debug overlay, drawn by the overlay instance
 // (botDebugStart) in the host's own window - the bots live here, so a listen
 // server's host is the only one who can see it. Layers, bottom up: the nav
-// graph (toggle), each bot's route (toggle), target, aim-error cone and handover radius
-// (toggle), the bots' labels (toggle) stacked so they stay readable, and the
+// graph, each bot's route, target and aim-error cone, and handover radius,
+// the bots' labels stacked so they stay readable (each a toggle), and the
 // HUD at top left, collapsed to its title until clicked, with the toggles and
 // the difficulty buttons at its foot (botDebugStep reads the clicks). Not in
 // the C#.
@@ -60,8 +60,12 @@ else
             hud += "#distance tables: none (straight-line heuristic)";
     }
     hud += "#bot layer: " + string(round(10 * global.botCostSum / max(1, global.botCostTicks)) / 10) + " ms/frame avg, " + string(global.botCostMax) + " max; mode " + global.botMode;
-    hud += "#label: x,y and nav node, then who drives (scripted or the policy network)";
-    hud += "#lines: route, goal X, target (red seen, grey lost)#yellow cone: aim error (narrower = harder difficulty)";
+    if (global.botDebugLabels)
+        hud += "#info: x,y, nav node, decision layer";
+    if (global.botDebugPaths)
+        hud += "#paths: route, goal X";
+    if (global.botDebugTargeting)
+        hud += "#targeting: target LOS, yellow cone aim error";
     if (global.botDebugNav)
         hud += "#nav: grey walk, blue fall, purple drop-through, green jump,#cyan double jump, orange rocket jump, white movebox";
     if (global.botDebugHandover)
@@ -73,39 +77,39 @@ global.botDebugBoxY1 = vy + 4;
 global.botDebugBoxX2 = vx + 4 + string_width(hud) + 8;
 global.botDebugBoxY2 = vy + 4 + string_height(hud) + 8;
 
-// At the foot of the open HUD: the layer toggles (buttons 0-3), and below them
-// the difficulty, one button a tier (4-8 are tiers 1-5), lit on the current one.
+// At the foot of the open HUD: the layer toggles (buttons 0-4), and below them
+// the difficulty, one button a tier (5-9 are tiers 1-5), lit on the current one.
 global.botDebugButtonCount = 0;
 if (global.botDebugOpen)
 {
     bx = vx + 8;
     by = global.botDebugBoxY2;
     dx = bx + string_width("difficulty:") + 6;
-    for (i = 0; i < 9; i += 1)
+    for (i = 0; i < 10; i += 1)
     {
-        if (i == 4)
+        if (i == 5)
         {
             global.botDebugBoxX2 = max(global.botDebugBoxX2, bx);
             bx = dx;
             by = global.botDebugButtonY2[0] + 6;
         }
-        if (i >= 4)
+        if (i >= 5)
         {
-            if (i == 4)
+            if (i == 5)
                 txt = "Easy";
-            else if (i == 5)
-                txt = "Medium";
             else if (i == 6)
-                txt = "Hard";
+                txt = "Medium";
             else if (i == 7)
+                txt = "Hard";
+            else if (i == 8)
                 txt = "Very hard";
             else
                 txt = "Max";
-            on = (global.botDifficulty == i - 3);
+            on = (global.botDifficulty == i - 4);
         }
         else if (i == 0)
         {
-            txt = "bot labels";
+            txt = "info";
             on = global.botDebugLabels;
         }
         else if (i == 1)
@@ -114,6 +118,11 @@ if (global.botDebugOpen)
             on = global.botDebugPaths;
         }
         else if (i == 2)
+        {
+            txt = "targeting";
+            on = global.botDebugTargeting;
+        }
+        else if (i == 3)
         {
             txt = "nav graph";
             on = global.botDebugNav;
@@ -132,9 +141,9 @@ if (global.botDebugOpen)
         global.botDebugButtonY2[i] = by + string_height(txt) + 6;
         bx += w + 6;
     }
-    global.botDebugButtonCount = 9;
+    global.botDebugButtonCount = 10;
     global.botDebugBoxX2 = max(global.botDebugBoxX2, bx);
-    global.botDebugBoxY2 = global.botDebugButtonY2[8] + 4;
+    global.botDebugBoxY2 = global.botDebugButtonY2[9] + 4;
 }
 
 draw_set_color(c_black);
@@ -144,7 +153,7 @@ draw_set_alpha(1);
 draw_set_color(c_white);
 draw_text(vx + 8, vy + 8, hud);
 if (global.botDebugOpen)
-    draw_text(vx + 8, global.botDebugButtonY1[4] + 3, "difficulty:");
+    draw_text(vx + 8, global.botDebugButtonY1[5] + 3, "difficulty:");
 for (i = 0; i < global.botDebugButtonCount; i += 1)
 {
     // Lit when on.

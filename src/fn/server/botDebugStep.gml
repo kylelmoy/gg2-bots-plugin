@@ -12,13 +12,15 @@ for (i = 0; i < global.botDebugButtonCount; i += 1)
         continue;
     if (mouse_y < global.botDebugButtonY1[i] || mouse_y > global.botDebugButtonY2[i])
         continue;
-    if (i >= 4)
-        botDifficultySet(i - 3);
+    if (i >= 5)
+        botDifficultySet(i - 4);
     else if (i == 0)
         global.botDebugLabels = !global.botDebugLabels;
     else if (i == 1)
         global.botDebugPaths = !global.botDebugPaths;
     else if (i == 2)
+        global.botDebugTargeting = !global.botDebugTargeting;
+    else if (i == 3)
         global.botDebugNav = !global.botDebugNav;
     else
         global.botDebugHandover = !global.botDebugHandover;

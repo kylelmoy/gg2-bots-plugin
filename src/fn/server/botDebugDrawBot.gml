@@ -47,7 +47,7 @@ if (global.botNavReady && global.botDebugPaths)
 }
 
 // Target and aim.
-if (p.botCombatTargetExists)
+if (p.botCombatTargetExists && global.botDebugTargeting)
 {
     if (p.botCombatVisible)
     {
@@ -65,7 +65,7 @@ if (p.botCombatTargetExists)
 
 // The aim-error cone around where the bot is aiming: what difficulty buys.
 // Its half-angle is the scripted aim error, or the policy's when it drives.
-if (skilled)
+if (skilled && global.botDebugTargeting)
 {
     if (p.botHybridDriving >= 0)
         err = p.botSkillPolicyAimErrorDeg;
