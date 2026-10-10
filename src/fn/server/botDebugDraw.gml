@@ -15,6 +15,8 @@ draw_set_valign(fa_top);
 
 if (global.botDebugNav)
     botDebugDrawNav();
+if (global.botDebugPaths && global.botNavReady)
+    botDebugDrawPaths();
 
 global.botDebugLabelCount = 0;
 with (Player)
@@ -63,7 +65,7 @@ else
     if (global.botDebugLabels)
         hud += "#info: x,y, nav node, decision layer";
     if (global.botDebugPaths)
-        hud += "#paths: route, goal X";
+        hud += "#paths: route (wider = more bots on it), goal X";
     if (global.botDebugTargeting)
         hud += "#targeting: target LOS, yellow cone aim error";
     if (global.botDebugNav)

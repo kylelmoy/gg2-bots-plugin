@@ -1,0 +1,2 @@
+// The [Bots] Debug overlay (src/fn/server/botDebug*). Not in the C#.
+BOT_DEBUG_PATH_RANGE 500 // px from its bot that a route is drawn to

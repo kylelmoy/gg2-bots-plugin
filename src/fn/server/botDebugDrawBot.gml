@@ -1,7 +1,7 @@
 // botDebugDrawBot(player, char): one bot's part of the debug overlay
 // (botDebugDraw). World coordinates; the caller's view is already applied.
 // Its label (position, node, route trouble, who drives) is queued, not drawn.
-var p, c, cx, cy, col, k, n, size, ax, ay, bx, by, node, label, driver, cone, len, err, skilled, driven;
+var p, c, cx, cy, col, k, n, bx, by, node, label, driver, cone, len, err, skilled, driven;
 p = argument0;
 c = argument1;
 cx = c.x;
@@ -16,33 +16,37 @@ else
     col = make_color_rgb(110, 160, 255);
 
 // Route: from the bot to the node it is heading for (PathAt is the one it is
-// on), on through the rest, then the goal.
+// on), and the goal, each within BOT_DEBUG_PATH_RANGE. The rest of the route
+// is botDebugDrawPaths', shared with the other bots on it.
 if (global.botNavReady && global.botDebugPaths)
 {
-    size = ds_list_size(p.botPathPath);
-    ax = cx;
-    ay = cy;
     draw_set_color(col);
     draw_set_alpha(0.8);
-    for (k = max(0, p.botPathPathAt + 1); k < size; k += 1)
+    k = max(0, p.botPathPathAt + 1);
+    if (k < ds_list_size(p.botPathPath))
     {
         n = ds_list_find_value(p.botPathPath, k);
-        if (n < 0 || n >= global.botNavNodeCount)
-            break;
-        navGraphWorldSpan(n);
-        bx = (global.botRetLeft + global.botRetRight) / 2;
-        by = navGraphStandY(n);
-        draw_line(ax, ay, bx, by);
-        draw_circle(bx, by, 2, false);
-        ax = bx;
-        ay = by;
+        if (n >= 0 && n < global.botNavNodeCount)
+        {
+            navGraphWorldSpan(n);
+            bx = (global.botRetLeft + global.botRetRight) / 2;
+            by = navGraphStandY(n);
+            if (point_distance(cx, cy, bx, by) <= BOT_DEBUG_PATH_RANGE)
+            {
+                draw_line(cx, cy, bx, by);
+                draw_circle(bx, by, 2, false);
+            }
+        }
     }
     if (p.botPathHasGoal)
     {
         bx = p.botPathGoalX;
         by = p.botPathGoalY;
-        draw_line_width(bx - 6, by - 6, bx + 6, by + 6, 2);
-        draw_line_width(bx - 6, by + 6, bx + 6, by - 6, 2);
+        if (point_distance(cx, cy, bx, by) <= BOT_DEBUG_PATH_RANGE)
+        {
+            draw_line_width(bx - 6, by - 6, bx + 6, by + 6, 2);
+            draw_line_width(bx - 6, by + 6, bx + 6, by - 6, 2);
+        }
     }
 }
 
