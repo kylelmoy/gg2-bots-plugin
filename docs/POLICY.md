@@ -62,7 +62,7 @@ aim are ever live.
 ## The file: `bots/policy/<label>.txt`
 
 Made by `node tools/convert-policy.js` (defaults: every `.npz` in
-gg2-server's `checkpoints/`, out to `build/data/policy/`, which `tools/build.js`
+gg2-server's `checkpoints/`, out to `data/policy/` (committed), which `tools/build.js`
 copies to `Plugins/bots/policy/`). The label is the checkpoint's file name
 without `.npz`, the name `[Bots] ClassPolicy` uses. CRLF text, one field a
 line:

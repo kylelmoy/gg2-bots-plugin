@@ -210,11 +210,14 @@ function assemble() {
   fs.copyFileSync(path.join(SRC, 'bots.gml'), path.join(out, 'bots.gml'));
   fs.copyFileSync(path.join(SRC, 'menu.gml'), path.join(out, 'bots', 'menu.gml'));
   copyDir(path.join(BUILD, 'code'), path.join(out, 'bots', 'code'));
-  // Static data shipped beside the code: policy weights and nav graphs, each
-  // produced by its own tool into build/data/.
+  // Static data shipped beside the code: policy weights and nav graphs. What
+  // ships is committed in data/ (convert-policy.js, navdata.js); build/data/
+  // adds what only a dev game gets (the stock maps' .dist tables), and data/
+  // wins where both have a file.
   for (const d of ['policy', 'nav']) {
-    const from = path.join(BUILD, 'data', d);
-    if (fs.existsSync(from)) copyDir(from, path.join(out, 'bots', d));
+    for (const from of [path.join(BUILD, 'data', d), path.join(ROOT, 'data', d)]) {
+      if (fs.existsSync(from)) copyDir(from, path.join(out, 'bots', d));
+    }
   }
   const ini = path.join(SRC, 'bots.ini');
   if (fs.existsSync(ini)) fs.copyFileSync(ini, path.join(out, 'bots', 'bots.ini.example'));

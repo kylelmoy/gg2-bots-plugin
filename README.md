@@ -107,8 +107,8 @@ In short:
 ## Building
 
 ```
-node tools/convert-policy.js        the C# server's checkpoints -> build/data/policy
-node tools/navdata.js [--publish]   the reference gg2-navgen.exe -> build/data/navgen (+ stock maps' nav data)
+node tools/convert-policy.js        the C# server's checkpoints -> data/policy
+node tools/navdata.js [--publish]   the reference gg2-navgen.exe -> build/data/navgen (+ stock maps' graphs -> data/nav)
 node tools/navbench.js [map[:area]] time the GML generator against the exe, compare the files
 node tools/build.js                 transpile, lint, install into a dev game
 node tools/build.js --zip           and write dist/gg2-bots.zip
@@ -116,5 +116,20 @@ node tools/test-botc.js             transpiler tests
 node tools/livecheck.js             drive a running gg2_session through maps
 ```
 
-Needs Node 18+, Game Maker 8 and a GML linter (`GML_LINT`), and the C#
+Needs Node 22+, Game Maker 8 and a GML linter (`GML_LINT`), and the C#
 server's source (for the checkpoints and the reference generator).
+
+## Releasing
+
+Lint and check locally (`node tools/build.js`, `node tools/livecheck.js`), then
+push a tag:
+
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+`.github/workflows/release.yml` runs the transpiler tests, builds
+`dist/gg2-bots.zip` from the committed source and `data/`, and attaches it to
+a GitHub release of that tag. It can also be run by hand from the Actions tab,
+which builds the zip as a workflow artifact without releasing it.

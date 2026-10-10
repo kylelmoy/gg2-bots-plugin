@@ -1,0 +1,45 @@
+# Push a tag v* and this builds dist/gg2-bots.zip and attaches it to a GitHub
+# release of that tag. The GML is not linted here (the linter needs a Game
+# Maker 8 install): run `node tools/build.js` locally before tagging.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Transpiler tests
+        run: node tools/test-botc.js
+
+      - name: Build the zip
+        run: node tools/build.js --no-lint --no-install --zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gg2-bots
+          path: dist/gg2-bots.zip
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/gg2-bots.zip --clobber
+          else
+            gh release create "$TAG" dist/gg2-bots.zip --title "$TAG" --generate-notes
+          fi

@@ -12,9 +12,9 @@
 // 2. Copies the exe (default <server>/src/GG2.NavGen/bin/publish/gg2-navgen.exe)
 //    to build/data/navgen/gg2-navgen.exe.
 // 3. Empties build/data/nav and runs `gg2-navgen --all --out build/data/nav`.
-//
-// tools/build.js installs build/data/nav into a dev game (never the zip). Nothing
-// here is committed: build/ is gitignored. docs/NAVFILES.md has the formats.
+// 4. Replaces data/nav (committed) with the graphs (.txt) of that run: what the
+//    zip ships. The distance tables (.dist) stay in build/data/nav, which
+//    tools/build.js installs into a dev game only. docs/NAVFILES.md has the formats.
 //=============================================================================
 'use strict';
 
@@ -71,4 +71,10 @@ let bytes = 0;
 const files = fs.readdirSync(navDir);
 for (const f of files) bytes += fs.statSync(path.join(navDir, f)).size;
 console.log(`navdata: ${files.length} files, ${(bytes / 1048576).toFixed(1)} MB in ${Date.now() - started} ms -> ${path.relative(ROOT, navDir)}`);
+const shipDir = path.join(ROOT, 'data', 'nav');
+fs.rmSync(shipDir, { recursive: true, force: true });
+fs.mkdirSync(shipDir, { recursive: true });
+const graphs = files.filter((f) => f.endsWith('.txt'));
+for (const f of graphs) fs.copyFileSync(path.join(navDir, f), path.join(shipDir, f));
+console.log(`navdata: ${graphs.length} graphs -> ${path.relative(ROOT, shipDir)}`);
 console.log(`navdata: ${path.relative(ROOT, exe)} (${(fs.statSync(exe).size / 1048576).toFixed(1)} MB)`);

@@ -1,3 +1,5 @@
 * text=auto eol=lf
 *.exe binary
 *.png binary
+# Shipped byte-for-byte (CRLF, as the tools write them).
+data/** -text

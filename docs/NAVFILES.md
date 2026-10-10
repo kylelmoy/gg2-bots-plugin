@@ -158,11 +158,13 @@ git -C D:/Code/gg2-server worktree add D:/Code/gg2-server-botsplugin bots-plugin
 # self-contained, single file, trimmed, ReadyToRun, win-x64 (~16 MB)
 dotnet publish D:/Code/gg2-server-botsplugin/src/GG2.NavGen -c Release -r win-x64 -o D:/Code/gg2-server-botsplugin/src/GG2.NavGen/bin/publish
 
-# copy it to build/data/navgen/ and generate build/data/nav/ (--publish does the step above first)
+# copy it to build/data/navgen/, generate build/data/nav/ and copy its graphs to data/nav/
+# (--publish does the step above first)
 node tools/navdata.js [--publish] [--server <worktree>] [--exe <path>]
 
-node tools/build.js          # installs build/data/{nav,policy} into a dev game
+node tools/build.js          # installs data/ and build/data/ into a dev game
 ```
 
-Neither the exe nor the generated files are committed; `build/` is
-gitignored.
+The stock maps' graphs in `data/nav/` are committed: they are what the zip
+ships, and the release workflow builds from them. The exe and the distance
+tables are not; `build/` is gitignored.

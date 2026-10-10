@@ -6,7 +6,7 @@
 //   node tools/convert-policy.js [checkpoint.npz | dir]... [--out <dir>] [--name <label>] [--ignore-stamp]
 //
 // With no inputs it converts every .npz in the C# server's checkpoints/ (the
-// shipped bundle). Output goes to build/data/policy/<label>.txt, which
+// shipped bundle). Output goes to data/policy/<label>.txt (committed), which
 // tools/build.js copies into the plugin as Plugins/bots/policy/. The label is
 // what the plugin calls the network ([Bots] ClassPolicy, policy.log), so a
 // shipped checkpoint gets a name for what it drives (SHIPPED_NAMES) rather
@@ -50,7 +50,7 @@ const zlib = require('zlib');
 
 const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_SRC = path.join(process.env.GG2_SERVER || 'D:/Code/gg2-server', 'checkpoints');
-const DEFAULT_OUT = path.join(ROOT, 'build', 'data', 'policy');
+const DEFAULT_OUT = path.join(ROOT, 'data', 'policy');
 
 // Training-run name -> shipped label. Sorted as the tiers are (the loader
 // loads in file-name order).
